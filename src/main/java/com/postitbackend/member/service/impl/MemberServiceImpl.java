@@ -12,9 +12,14 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.WebAuthenticationDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Optional;
 
 @Service
 @Slf4j
@@ -22,15 +27,22 @@ import org.springframework.transaction.annotation.Transactional;
 public class MemberServiceImpl implements MemberService {
 
     private final MemberRepository memberRepository;
-    private final BCryptPasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
 
     @Override
     @Transactional(readOnly = true)
-    public boolean findMember(MemberDTO dto) {
-//        Member member = memberRepository.findByEmailAndPassword(dto.getEmail(), dto.getPassword());
-//        return member != null;
-        return true;
+    public MemberDTO findMember(MemberDTO memberDTO) {
+        Optional<Member> member = memberRepository.findByEmail(memberDTO.getEmail());
+        MemberDTO dto;
+
+        if (member.isPresent()) {
+            dto = member.get().toDTO();
+        } else {
+            dto = null;
+        }
+
+        return dto;
     }
 
     @Override
@@ -56,7 +68,10 @@ public class MemberServiceImpl implements MemberService {
     @Transactional
     public MemberDTO createMember(MemberDTO memberDTO) {
         memberDTO.setPassword(passwordEncoder.encode(memberDTO.getPassword()));
+        memberDTO.setEnable(1);
         memberDTO.setRole("ROLE_USER");
+        memberDTO.setRegDate(LocalDateTime.now());
+        memberDTO.setUdtDate(LocalDateTime.now());
 
         Member member = memberRepository.save(memberDTO.toEntity());
 

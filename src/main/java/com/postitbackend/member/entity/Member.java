@@ -15,7 +15,8 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 public class Member {
 
-    @Id @GeneratedValue
+    @Id
+    @GeneratedValue
     private Long id;
 
     private String email;
@@ -30,6 +31,7 @@ public class Member {
         return MemberDTO.builder()
                 .id(this.id)
                 .email(this.email)
+                .password(this.password)
                 .name(this.name)
                 .role(this.role)
                 .enable(this.enable)

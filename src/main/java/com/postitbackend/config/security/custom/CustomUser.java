@@ -1,14 +1,17 @@
-package com.postitbackend.config.security;
+package com.postitbackend.config.security.custom;
 
 import com.postitbackend.member.dto.MemberDTO;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+@Getter
 @RequiredArgsConstructor
 public class CustomUser implements UserDetails {
 
@@ -20,11 +23,9 @@ public class CustomUser implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        List<UserAuth> authList = memberDTO.getAuthList();
-
-        return authList.stream()
-                .map((auth) -> new SimpleGrantedAuthority(auth.getAuth()))
-                .toList();
+        List<GrantedAuthority> authorities = new ArrayList<>();
+        authorities.add(new SimpleGrantedAuthority(memberDTO.getRole()));
+        return authorities;
     }
 
     @Override

@@ -1,4 +1,4 @@
-package com.postitbackend.config.security;
+package com.postitbackend.config.security.constants;
 
 public class SecurityConstants {
 

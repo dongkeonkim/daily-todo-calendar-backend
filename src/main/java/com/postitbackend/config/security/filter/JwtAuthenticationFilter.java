@@ -1,9 +1,9 @@
 package com.postitbackend.config.security.filter;
 
-import com.postitbackend.config.security.SecurityConstants;
+import com.postitbackend.config.security.constants.SecurityConstants;
+import com.postitbackend.config.security.custom.CustomUser;
 import com.postitbackend.member.dto.MemberDTO;
 import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -14,10 +14,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-
-import java.io.IOException;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -30,20 +26,21 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         setFilterProcessesUrl("/login");
     }
 
+    /**
+     * 사용자 인증 여부 확인
+     */
     @Override
-    public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
-
+    public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) {
         String username = request.getParameter("username");
         String password = request.getParameter("password");
 
         Authentication authentication = new UsernamePasswordAuthenticationToken(username, password);
 
-        authentication = authenticationManager.authenticate(authentication);
-
-        log.info("인증 여부: " + authentication.isAuthenticated());
-
-        if (!authentication.isAuthenticated()) {
-            response.setStatus(HttpStatus.UNAUTHORIZED.value());
+        try {
+            authentication = authenticationManager.authenticate(authentication);
+            log.info("인증 여부: " + authentication.isAuthenticated());
+        } catch (AuthenticationException e) {
+            log.warn(e.getMessage());
         }
 
         return authentication;
@@ -55,14 +52,13 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
      * - JWT 토큰을 응답 헤더에 설정
      */
     @Override
-    protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authResult) throws IOException, ServletException {
-        MemberDTO memberDTO = (MemberDTO) authResult.getPrincipal();
+    protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authResult) {
+        CustomUser customUser = (CustomUser) authResult.getPrincipal();
+        MemberDTO memberDTO = customUser.getMemberDTO();
+
         Long id = memberDTO.getId();
         String email = memberDTO.getEmail();
-
-        List<String> roles = memberDTO.getAuthList().stream()
-                .map((auth) -> auth.getAuth())
-                .collect(Collectors.toList());
+        String roles = memberDTO.getRole();
 
         String jwt = jwtTokenProvider.createToken(id, email, roles);
         response.addHeader(SecurityConstants.TOKEN_HEADER, SecurityConstants.TOKEN_PREFIX + jwt);

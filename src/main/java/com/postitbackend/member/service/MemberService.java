@@ -9,6 +9,6 @@ public interface MemberService {
 
     void login(MemberDTO member, HttpServletRequest request);
 
-    boolean findMember(MemberDTO dto);
+    MemberDTO findMember(MemberDTO dto);
 
 }

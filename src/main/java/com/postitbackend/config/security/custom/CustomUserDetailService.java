@@ -1,4 +1,4 @@
-package com.postitbackend.config.security;
+package com.postitbackend.config.security.custom;
 
 import com.postitbackend.member.entity.Member;
 import com.postitbackend.member.repository.MemberRepository;

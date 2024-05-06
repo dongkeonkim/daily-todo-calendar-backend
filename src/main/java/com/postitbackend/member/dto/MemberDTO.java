@@ -1,17 +1,15 @@
 package com.postitbackend.member.dto;
 
-import com.postitbackend.config.security.UserAuth;
 import com.postitbackend.member.entity.Member;
 import lombok.*;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Getter
 @Setter
 @Builder
-@RequiredArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
 public class MemberDTO {
 
     private Long id;
@@ -23,19 +21,6 @@ public class MemberDTO {
     private LocalDateTime regDate;
     private LocalDateTime udtDate;
 
-    List<UserAuth> authList;
-
-    public MemberDTO createMemberDTO(String email, String password, String name, int enable, LocalDateTime regDate, LocalDateTime udtDate) {
-        return MemberDTO.builder()
-                .email(email)
-                .password(password)
-                .name(name)
-                .enable(enable)
-                .regDate(regDate)
-                .udtDate(udtDate)
-                .build();
-    }
-
     public Member toEntity() {
         return Member.builder()
                 .email(this.email)
@@ -45,6 +30,15 @@ public class MemberDTO {
                 .enable(this.enable)
                 .regDate(this.regDate)
                 .udtDate(this.udtDate)
+                .build();
+    }
+
+    public MemberSearchResult toMemberSearchResult() {
+        return MemberSearchResult.builder()
+                .id(this.id)
+                .email(this.email)
+                .name(this.name)
+                .role(this.role)
                 .build();
     }
 
