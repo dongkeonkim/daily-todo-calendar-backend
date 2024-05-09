@@ -1,6 +1,7 @@
 package com.postitbackend.member.service;
 
 import com.postitbackend.member.dto.MemberDTO;
+import com.postitbackend.member.dto.MemberUpdateDTO;
 import jakarta.servlet.http.HttpServletRequest;
 
 public interface MemberService {
@@ -9,6 +10,8 @@ public interface MemberService {
 
     void login(MemberDTO member, HttpServletRequest request);
 
-    MemberDTO findMember(MemberDTO dto);
+    MemberDTO findMember(MemberDTO memberDTO);
+
+    boolean updateMember(MemberDTO memberDTO, MemberUpdateDTO memberUpdateDTO);
 
 }

@@ -2,9 +2,11 @@ package com.postitbackend.member.controller;
 
 import com.postitbackend.config.security.custom.CustomUser;
 import com.postitbackend.member.dto.MemberDTO;
+import com.postitbackend.member.dto.MemberUpdateDTO;
 import com.postitbackend.member.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.coyote.Response;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
@@ -38,8 +40,15 @@ public class MemberController {
 
     @Secured("ROLE_USER")
     @PutMapping("/update")
-    public ResponseEntity<?> update(@RequestBody MemberDTO memberDTO) {
-        return new ResponseEntity<>(HttpStatus.OK);
+    public ResponseEntity<?> update(@AuthenticationPrincipal CustomUser customUser, @RequestBody MemberUpdateDTO memberUpdateDTO) {
+        boolean result = memberService.updateMember(customUser.getMemberDTO(), memberUpdateDTO);
+
+        if (result) {
+            return new ResponseEntity<>(HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
     }
 
     @Secured("ROLE_USER")

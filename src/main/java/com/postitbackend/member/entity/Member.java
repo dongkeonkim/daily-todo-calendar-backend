@@ -27,6 +27,10 @@ public class Member {
     private LocalDateTime regDate;
     private LocalDateTime udtDate;
 
+    public void updatePassword(String password) {
+        this.password = password;
+    }
+
     public MemberDTO toDTO() {
         return MemberDTO.builder()
                 .id(this.id)

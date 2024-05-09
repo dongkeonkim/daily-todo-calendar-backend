@@ -1,6 +1,7 @@
 package com.postitbackend.member.service.impl;
 
 import com.postitbackend.member.dto.MemberDTO;
+import com.postitbackend.member.dto.MemberUpdateDTO;
 import com.postitbackend.member.entity.Member;
 import com.postitbackend.member.repository.MemberRepository;
 import com.postitbackend.member.service.MemberService;
@@ -11,14 +12,12 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.WebAuthenticationDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 
 @Service
@@ -78,4 +77,22 @@ public class MemberServiceImpl implements MemberService {
         return member.toDTO();
     }
 
+    @Override
+    @Transactional
+    public boolean updateMember(MemberDTO mDTO, MemberUpdateDTO memberUpdateDTO) {
+        boolean result = false;
+        Member member;
+        Optional<Member> m = memberRepository.findByEmail(mDTO.getEmail());
+
+        if (m.isPresent()) {
+            member = m.get();
+
+            if (passwordEncoder.matches(memberUpdateDTO.getCurrentPassword(), member.getPassword())) {
+                member.updatePassword(passwordEncoder.encode(memberUpdateDTO.getNewPassword()));
+                result = true;
+            }
+        }
+
+        return result;
+    }
 }
