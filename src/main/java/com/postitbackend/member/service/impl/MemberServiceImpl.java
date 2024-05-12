@@ -33,15 +33,7 @@ public class MemberServiceImpl implements MemberService {
     @Transactional(readOnly = true)
     public MemberDTO findMember(MemberDTO memberDTO) {
         Optional<Member> member = memberRepository.findByEmailAndEnable(memberDTO.getEmail(), 1);
-        MemberDTO dto;
-
-        if (member.isPresent()) {
-            dto = member.get().toDTO();
-        } else {
-            dto = null;
-        }
-
-        return dto;
+        return member.map(Member::toDTO).orElse(null);
     }
 
     @Override
@@ -65,16 +57,24 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     @Transactional
-    public MemberDTO createMember(MemberDTO memberDTO) {
+    public void createMember(MemberDTO memberDTO) {
+        Optional<Member> optMember = memberRepository.findByEmail(memberDTO.getEmail());
+
+        optMember.ifPresent(member -> {
+            throw new RuntimeException();
+        });
+
         memberDTO.setPassword(passwordEncoder.encode(memberDTO.getPassword()));
         memberDTO.setEnable(1);
         memberDTO.setRole("ROLE_USER");
         memberDTO.setRegDate(LocalDateTime.now());
         memberDTO.setUdtDate(LocalDateTime.now());
 
-        Member member = memberRepository.save(memberDTO.toEntity());
-
-        return member.toDTO();
+        try {
+            memberRepository.save(memberDTO.toEntity());
+        } catch (RuntimeException e) {
+            throw new RuntimeException();
+        }
     }
 
     @Override

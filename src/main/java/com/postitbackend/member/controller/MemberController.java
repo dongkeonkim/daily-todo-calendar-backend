@@ -33,8 +33,13 @@ public class MemberController {
     }
 
     @PostMapping("/create")
-    public MemberDTO createMember(@RequestBody MemberDTO memberDTO) {
-        return memberService.createMember(memberDTO);
+    public ResponseEntity<?> createMember(@RequestBody MemberDTO memberDTO) {
+        try {
+            memberService.createMember(memberDTO);
+            return ResponseEntity.status(HttpStatus.OK).body("계정이 생성되었습니다.");
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("이미 존재하는 이메일 입니다.");
+        }
     }
 
     @Secured("ROLE_USER")

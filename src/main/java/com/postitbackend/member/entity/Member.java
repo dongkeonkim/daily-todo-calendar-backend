@@ -1,6 +1,7 @@
 package com.postitbackend.member.entity;
 
 import com.postitbackend.member.dto.MemberDTO;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
@@ -15,16 +16,22 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 public class Member {
 
-    @Id
-    @GeneratedValue
+    @Id @GeneratedValue
     private Long id;
 
+    @Column(unique = true)
     private String email;
+
     private String password;
+
     private String name;
+
     private String role;
+
     private int enable;
+
     private LocalDateTime regDate;
+
     private LocalDateTime udtDate;
 
     public void updatePassword(String password) {

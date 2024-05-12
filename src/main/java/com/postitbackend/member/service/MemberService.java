@@ -6,7 +6,7 @@ import jakarta.servlet.http.HttpServletRequest;
 
 public interface MemberService {
 
-    MemberDTO createMember(MemberDTO memberDTO);
+    void createMember(MemberDTO memberDTO);
 
     void login(MemberDTO member, HttpServletRequest request);
 
