@@ -32,7 +32,7 @@ public class MemberServiceImpl implements MemberService {
     @Override
     @Transactional(readOnly = true)
     public MemberDTO findMember(MemberDTO memberDTO) {
-        Optional<Member> member = memberRepository.findByEmail(memberDTO.getEmail());
+        Optional<Member> member = memberRepository.findByEmailAndEnable(memberDTO.getEmail(), 1);
         MemberDTO dto;
 
         if (member.isPresent()) {
@@ -82,13 +82,31 @@ public class MemberServiceImpl implements MemberService {
     public boolean updateMember(MemberDTO mDTO, MemberUpdateDTO memberUpdateDTO) {
         boolean result = false;
         Member member;
-        Optional<Member> m = memberRepository.findByEmail(mDTO.getEmail());
+        Optional<Member> m = memberRepository.findByEmailAndEnable(mDTO.getEmail(), 1);
 
         if (m.isPresent()) {
             member = m.get();
 
             if (passwordEncoder.matches(memberUpdateDTO.getCurrentPassword(), member.getPassword())) {
                 member.updatePassword(passwordEncoder.encode(memberUpdateDTO.getNewPassword()));
+                result = true;
+            }
+        }
+
+        return result;
+    }
+
+    @Override
+    @Transactional
+    public boolean deleteMember(MemberDTO memberDTO) {
+        boolean result = false;
+        Member member;
+        Optional<Member> m = memberRepository.findByEmailAndEnable(memberDTO.getEmail(), 1);
+
+        if (m.isPresent()) {
+            member = m.get();
+            if (passwordEncoder.matches(memberDTO.getPassword(), member.getPassword())) {
+                member.changeEnable(0);
                 result = true;
             }
         }

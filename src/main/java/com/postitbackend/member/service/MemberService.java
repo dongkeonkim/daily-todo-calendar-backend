@@ -14,4 +14,6 @@ public interface MemberService {
 
     boolean updateMember(MemberDTO memberDTO, MemberUpdateDTO memberUpdateDTO);
 
+    boolean deleteMember(MemberDTO memberDTO);
+
 }

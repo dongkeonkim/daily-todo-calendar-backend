@@ -68,7 +68,7 @@ public class JwtTokenProvider {
             MemberDTO memberDTO = new MemberDTO();
 
             try {
-                Optional<Member> member = memberRepository.findByEmail(email);
+                Optional<Member> member = memberRepository.findByEmailAndEnable(email, 1);
                 member.ifPresent(m -> {
                     memberDTO.setId(m.getId());
                     memberDTO.setRole(m.getRole());

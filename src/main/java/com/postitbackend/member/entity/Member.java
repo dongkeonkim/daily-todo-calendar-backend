@@ -31,6 +31,10 @@ public class Member {
         this.password = password;
     }
 
+    public void changeEnable(int enable) {
+        this.enable = enable;
+    }
+
     public MemberDTO toDTO() {
         return MemberDTO.builder()
                 .id(this.id)

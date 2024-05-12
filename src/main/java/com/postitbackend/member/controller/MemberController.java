@@ -53,6 +53,13 @@ public class MemberController {
     @Secured("ROLE_USER")
     @PutMapping("/delete")
     public ResponseEntity<?> delete(@RequestBody MemberDTO memberDTO) {
-        return new ResponseEntity<>(HttpStatus.OK);
+        boolean result  = memberService.deleteMember(memberDTO);
+
+        if (result) {
+            return new ResponseEntity<>(HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>("비밀번호가 올바르지 않습니다.", HttpStatus.BAD_REQUEST);
+        }
+
     }
 }
