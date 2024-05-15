@@ -1,85 +1,78 @@
 package com.postitbackend.postIt.memo.controller;
 
-import com.postitbackend.postIt.memo.dto.MemoDTO;
+import com.postitbackend.config.security.custom.CustomUser;
+import com.postitbackend.postIt.memo.dto.MemoDto;
 import com.postitbackend.postIt.memo.service.MemoService;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+@Slf4j
 @RestController
-@RequiredArgsConstructor
 @RequestMapping("/memo")
+@RequiredArgsConstructor
 public class MemoController {
 
     private final MemoService memoService;
 
-    @GetMapping("/findAll")
-    public ResponseEntity<List<MemoDTO>> findAll(HttpServletRequest request) {
-        HttpSession session = request.getSession();
-        String email = (String) session.getAttribute("memberEmail");
+    @GetMapping("/select")
+    public ResponseEntity<?> selectMemo(@AuthenticationPrincipal CustomUser customUser) {
+        List<MemoDto> memoDtoList = memoService.selectMemoAllByMemberId(customUser.getMemberDTO().getId());
 
-        List<MemoDTO> memoDTOs = memoService.findAllByEmail(email);
-
-        return ResponseEntity.ok().body(memoDTOs);
-    }
-
-    @GetMapping("/findFixedMemos")
-    public ResponseEntity<Void> findFixedMemos(HttpServletRequest request) {
-        HttpSession session = request.getSession();
-        String email = (String) session.getAttribute("memberEmail");
-
-        memoService.findFixedMemos(email);
-
-        return ResponseEntity.ok().build();
-    }
-
-    @GetMapping("/find")
-    public ResponseEntity<Void> findOne(@RequestBody MemoDTO memoDTO) {
-        return ResponseEntity.ok().build();
-    }
-
-    @PostMapping("/save")
-    public ResponseEntity<Void> save(@RequestBody MemoDTO memoDTO, HttpServletRequest request) {
-        HttpSession session = request.getSession();
-        String memberId = (String) session.getAttribute("memberId");
-
-        memoDTO.setMemberId(memberId);
-
-        int result = memoService.save(memoDTO);
-
-        if (result != 1) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        if (memoDtoList.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
 
-        return ResponseEntity.ok().build();
+        Map<String, Object> result = new HashMap<>();
+        result.put("memoList", memoDtoList);
+
+        return ResponseEntity.status(HttpStatus.OK).body(result);
     }
 
-    @GetMapping("/update")
-    public ResponseEntity<Void> update(@RequestBody MemoDTO memoDTO) {
-        int result = memoService.save(memoDTO);
+    @PostMapping("/create")
+    public ResponseEntity<?> createMemo(@RequestBody MemoDto memoDto, @AuthenticationPrincipal CustomUser customUser) {
+        boolean result = memoService.createMemo(memoDto, customUser.getMemberDTO().getId());
 
-        if (result != 1) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        if (!result) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
-    @GetMapping("/delete")
-    public ResponseEntity<Void> delete(@RequestBody MemoDTO memoDTO) {
-        memoDTO.setDelYn("Y");
+    @PutMapping("/update")
+    public ResponseEntity<?> updateMemo(@RequestBody MemoDto memoDto, @AuthenticationPrincipal CustomUser customUser) {
+        try {
+            boolean result = memoService.updateMemo(memoDto, customUser.getMemberDTO().getId());
 
-        int result = memoService.save(memoDTO);
+            if (!result) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+            }
 
-        if (result != 1) {
+            return ResponseEntity.status(HttpStatus.OK).build();
+        } catch (DataAccessException e) {
+            log.error("Memo Update Fail", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
-
-        return ResponseEntity.ok().build();
     }
+
+    @DeleteMapping("/delete")
+    public ResponseEntity<?> deleteMemo(@RequestBody MemoDto memoDto, @AuthenticationPrincipal CustomUser customUser) {
+        boolean result  = memoService.deleteMemo(memoDto, customUser.getMemberDTO().getId());
+
+        if (!result) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
+
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
 }

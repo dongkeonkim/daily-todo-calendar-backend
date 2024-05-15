@@ -1,6 +1,7 @@
 package com.postitbackend.postIt.memo.service;
 
-import com.postitbackend.postIt.memo.dto.MemoDTO;
+import com.postitbackend.postIt.memo.dto.MemoDto;
+import com.postitbackend.postIt.memo.entity.Memo;
 import com.postitbackend.postIt.memo.repository.MemoRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -8,54 +9,78 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
-@Service
 @Slf4j
+@Service
 @RequiredArgsConstructor
 public class MemoService {
 
     private final MemoRepository memoRepository;
 
-    @Transactional
-    public List<MemoDTO> findAllByEmail(String email) {
-//        List<Memo> results = memoRepository.findAllByEmail(email);
-        List<MemoDTO> memoDTOs = new ArrayList<>();
-//
-//        for (Memo memo : results) {
-//            memoDTOs.add(memo.toDTO());
-//        }
-//
-        return memoDTOs;
+    @Transactional(readOnly = true)
+    public List<MemoDto> selectMemoAllByMemberId(long memberId) {
+        return memoRepository.findAllByMemberId(memberId).stream()
+                .map(Memo::toDto)
+                .collect(Collectors.toList());
     }
 
     @Transactional
-    public List<MemoDTO> findFixedMemos(String email) {
-//        List<Memo> results = memoRepository.findFixedMemos(email);
-        List<MemoDTO> memoDTOs = new ArrayList<>();
-
-//        for (Memo memo : results) {
-//            memoDTOs.add(memo.toDTO());
-//        }
-
-        return memoDTOs;
+    public MemoDto selectMemo(MemoDto memoDto, long memberId) {
+        return memoRepository.findById(memoDto.getId())
+                .filter(memo -> memo.getMemberId() == memberId)
+                .map(Memo::toDto)
+                .orElse(null);
     }
 
     @Transactional
-    public MemoDTO findOne() {
-        return new MemoDTO();
-    }
+    public boolean createMemo(MemoDto memoDto, long memberId) {
+        memoDto.setMemberId(memberId);
+        memoDto.setRegDate(LocalDateTime.now());
+        memoDto.setUdtDate(LocalDateTime.now());
 
-    @Transactional
-    public int save(MemoDTO memoDTO) {
         try {
-            memoRepository.save(memoDTO.toEntity());
-            return 1;
+            memoRepository.save(memoDto.toEntity());
+            log.info("Memo Create Success");
         } catch (DataAccessException e) {
-            log.warn("Fail to insert memo: {}", e.getMessage());
-            return 0;
+            log.error("Memo Create Fail", e);
+            return false;
         }
+
+        return true;
+    }
+
+    @Transactional
+    public boolean updateMemo(MemoDto memoDto, long memberId) {
+        MemoDto mDto = selectMemo(memoDto, memberId);
+
+        if (mDto == null) {
+            return false;
+        }
+
+        mDto.setTitle(memoDto.getTitle());
+        mDto.setUdtDate(LocalDateTime.now());
+
+        memoRepository.save(mDto.toEntity());
+        log.info("Memo Update Success");
+
+        return true;
+    }
+
+    @Transactional
+    public boolean deleteMemo(MemoDto memoDto, long memberId) {
+        MemoDto mDto = selectMemo(memoDto, memberId);
+
+        if (mDto == null) {
+            return false;
+        }
+
+        memoRepository.delete(mDto.toEntity());
+        log.info("Memo Update Success");
+
+        return true;
     }
 
 }

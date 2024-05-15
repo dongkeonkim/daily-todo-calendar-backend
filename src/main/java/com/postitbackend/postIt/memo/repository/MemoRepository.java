@@ -3,10 +3,9 @@ package com.postitbackend.postIt.memo.repository;
 import com.postitbackend.postIt.memo.entity.Memo;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface MemoRepository extends JpaRepository<Memo, Long> {
+import java.util.List;
 
-//    List<Memo> findAllByMemberId(String email);
-//
-//    List<Memo> findFixedMemos(String email);
+public interface MemoRepository extends JpaRepository<Memo, Long>, MemoRepositoryCustom {
 
+    List<Memo> findAllByMemberId(Long memberId);
 }
