@@ -50,16 +50,6 @@ public class Todo {
         this.updatedAt = LocalDateTime.now();
     }
 
-    public void create(TodoDto todoDto) {
-        this.todoId = todoDto.getTodoId();
-        this.memoId = todoDto.getMemoId();
-        this.memberId = todoDto.getMemberId();
-        this.content = todoDto.getContent();
-        this.isCompleted = todoDto.isCompleted();
-        this.createdAt = todoDto.getCreatedAt();
-        this.updatedAt = todoDto.getUpdatedAt();
-    }
-
     @Builder
     public Todo(Long todoId, Long memoId, Long memberId, String content, boolean isCompleted, LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.todoId = todoId;
