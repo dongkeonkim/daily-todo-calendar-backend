@@ -1,8 +1,8 @@
-package com.postitbackend.postIt.memo.controller;
+package com.postitbackend.memo.controller;
 
 import com.postitbackend.config.security.custom.CustomUser;
-import com.postitbackend.postIt.memo.dto.MemoDto;
-import com.postitbackend.postIt.memo.service.MemoService;
+import com.postitbackend.memo.dto.MemoDto;
+import com.postitbackend.memo.service.MemoService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataAccessException;

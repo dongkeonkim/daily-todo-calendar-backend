@@ -1,6 +1,6 @@
-package com.postitbackend.postIt.memo.repository;
+package com.postitbackend.memo.repository;
 
-import com.postitbackend.postIt.memo.entity.Memo;
+import com.postitbackend.memo.entity.Memo;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

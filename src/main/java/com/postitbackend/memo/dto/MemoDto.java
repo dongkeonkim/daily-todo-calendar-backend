@@ -1,6 +1,6 @@
-package com.postitbackend.postIt.memo.dto;
+package com.postitbackend.memo.dto;
 
-import com.postitbackend.postIt.memo.entity.Memo;
+import com.postitbackend.memo.entity.Memo;
 import lombok.*;
 
 import java.time.LocalDateTime;

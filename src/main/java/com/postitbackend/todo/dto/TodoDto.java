@@ -1,7 +1,7 @@
-package com.postitbackend.postIt.todo.dto;
+package com.postitbackend.todo.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.postitbackend.postIt.todo.entity.Todo;
+import com.postitbackend.todo.entity.Todo;
 import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.Builder;

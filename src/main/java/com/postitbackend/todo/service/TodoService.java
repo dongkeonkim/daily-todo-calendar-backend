@@ -1,8 +1,8 @@
-package com.postitbackend.postIt.todo.service;
+package com.postitbackend.todo.service;
 
-import com.postitbackend.postIt.todo.dto.TodoDto;
-import com.postitbackend.postIt.todo.entity.Todo;
-import com.postitbackend.postIt.todo.repository.TodoRepository;
+import com.postitbackend.todo.dto.TodoDto;
+import com.postitbackend.todo.entity.Todo;
+import com.postitbackend.todo.repository.TodoRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

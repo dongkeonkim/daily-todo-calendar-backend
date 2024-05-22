@@ -1,6 +1,6 @@
-package com.postitbackend.postIt.memo.entity;
+package com.postitbackend.memo.entity;
 
-import com.postitbackend.postIt.memo.dto.MemoDto;
+import com.postitbackend.memo.dto.MemoDto;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;

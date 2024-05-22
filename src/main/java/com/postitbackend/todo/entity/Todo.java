@@ -1,6 +1,6 @@
-package com.postitbackend.postIt.todo.entity;
+package com.postitbackend.todo.entity;
 
-import com.postitbackend.postIt.todo.dto.TodoDto;
+import com.postitbackend.todo.dto.TodoDto;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;

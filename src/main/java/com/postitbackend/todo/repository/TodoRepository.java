@@ -1,6 +1,6 @@
-package com.postitbackend.postIt.todo.repository;
+package com.postitbackend.todo.repository;
 
-import com.postitbackend.postIt.todo.entity.Todo;
+import com.postitbackend.todo.entity.Todo;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

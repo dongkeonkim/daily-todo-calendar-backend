@@ -1,4 +1,4 @@
-package com.postitbackend.postIt.memo.repository;
+package com.postitbackend.memo.repository;
 
 public class MemoRepositoryImpl implements MemoRepositoryCustom {
 }

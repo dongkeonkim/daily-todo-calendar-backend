@@ -1,8 +1,8 @@
-package com.postitbackend.postIt.todo.controller;
+package com.postitbackend.todo.controller;
 
 import com.postitbackend.config.security.custom.CustomUser;
-import com.postitbackend.postIt.todo.dto.TodoDto;
-import com.postitbackend.postIt.todo.service.TodoService;
+import com.postitbackend.todo.dto.TodoDto;
+import com.postitbackend.todo.service.TodoService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataAccessException;
