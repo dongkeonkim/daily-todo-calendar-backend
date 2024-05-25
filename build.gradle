@@ -5,7 +5,7 @@ plugins {
 	id "com.ewerk.gradle.plugins.querydsl" version "1.0.10"
 }
 
-group = 'com.post-it-backend'
+group = 'com.dailytodocalendar'
 version = '0.0.1-SNAPSHOT'
 
 java {
