@@ -18,6 +18,7 @@ public class MemoDto {
     private String title;
     private String content;
     private List<TodoDto> todos;
+    private LocalDateTime scheduleDate;
     private LocalDateTime regDate;
     private LocalDateTime udtDate;
 
@@ -30,6 +31,7 @@ public class MemoDto {
                 .todos(todos != null ? todos.stream()
                         .map(TodoDto::toEntity)
                         .collect(Collectors.toList()) : List.of())
+                .scheduleDate(scheduleDate)
                 .regDate(regDate != null ? regDate : LocalDateTime.now())
                 .udtDate(udtDate != null ? udtDate : LocalDateTime.now())
                 .build();

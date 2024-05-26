@@ -31,6 +31,9 @@ public class Memo {
     @Column(name = "memo_content")
     private String content;
 
+    @Column(name = "memo_schedule_date")
+    private LocalDateTime scheduleDate;
+
     @OneToMany(mappedBy = "memo", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Todo> todos = new ArrayList<>();
 
@@ -49,31 +52,23 @@ public class Memo {
                 .todos(todos != null ? todos.stream()
                         .map(Todo::toDto)
                         .collect(Collectors.toList()) : List.of())
+                .scheduleDate(scheduleDate)
                 .regDate(regDate)
                 .udtDate(udtDate)
                 .build();
     }
 
     public void update(MemoDto memoDto) {
-        String title = memoDto.getTitle();
-        String content = memoDto.getContent();
-
         List<Todo> todos = memoDto.getTodos() != null ? memoDto.getTodos().stream()
                 .map(TodoDto::toEntity)
                 .toList() : List.of();
 
-        if (title != null) {
-            this.title = title;
-        }
-
-        if (content != null) {
-            this.content = content;
-        }
-
+        this.title = memoDto.getTitle();
+        this.content = memoDto.getContent();
         this.todos.clear();
         this.todos.addAll(todos);
         todos.forEach(todo -> todo.assignMemo(this));
-
+        this.scheduleDate = memoDto.getScheduleDate();
         this.udtDate = LocalDateTime.now();
     }
 }
