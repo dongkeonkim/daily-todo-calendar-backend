@@ -27,19 +27,21 @@ public class MemoService {
     }
 
     @Transactional
-    public void createMemo(MemoDto memoDto, MemberDto memberDto) {
+    public MemoDto createMemo(MemoDto memoDto, MemberDto memberDto) {
         memoDto.setMemberId(memberDto.getId());
         memoDto.getTodos().forEach(todoDto -> todoDto.setMemberId(memberDto.getId()));
 
-        memoRepository.save(memoDto.toEntity());
+        return memoRepository.save(memoDto.toEntity()).toDto();
     }
 
     @Transactional
-    public void updateMemo(MemoDto memoDto, MemberDto memberDto) {
+    public MemoDto updateMemo(MemoDto memoDto, MemberDto memberDto) {
         Memo memo = memoRepository.findByIdAndMemberId(memoDto.getId(), memberDto.getId())
                 .orElseThrow(IllegalArgumentException::new);
 
         memo.update(memoDto);
+
+        return memo.toDto();
     }
 
     @Transactional

@@ -1,5 +1,6 @@
 package com.dailytodocalendar.memo.controller;
 
+import com.dailytodocalendar.common.ResponseDto;
 import com.dailytodocalendar.config.security.custom.CustomUser;
 import com.dailytodocalendar.memo.dto.MemoDto;
 import com.dailytodocalendar.memo.service.MemoService;
@@ -23,51 +24,71 @@ public class MemoController {
     private final MemoService memoService;
 
     @GetMapping("/all")
-    public ResponseEntity<List<MemoDto>> selectMemoAll(@AuthenticationPrincipal CustomUser customUser) {
+    public ResponseEntity<ResponseDto<List<MemoDto>>> selectMemoAll(@AuthenticationPrincipal CustomUser customUser) {
+        ResponseDto<List<MemoDto>> response = new ResponseDto<>();
+
         List<MemoDto> memoDtoList = memoService.selectMemoAll(customUser.getMemberDto());
 
         if (memoDtoList.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(memoDtoList);
+            response.setMessage("메모가 없습니다.");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         }
 
-        return ResponseEntity.status(HttpStatus.OK).body(memoDtoList);
+        response.setData(memoDtoList);
+        response.setMessage("조회되었습니다.");
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
     @PostMapping("/create")
-    public ResponseEntity<String> createMemo(@RequestBody MemoDto memoDto, @AuthenticationPrincipal CustomUser customUser) {
+    public ResponseEntity<ResponseDto<MemoDto>> createMemo(@RequestBody MemoDto memoDto, @AuthenticationPrincipal CustomUser customUser) {
+        ResponseDto<MemoDto> response = new ResponseDto<>();
+
         try {
-            memoService.createMemo(memoDto, customUser.getMemberDto());
-            return ResponseEntity.status(HttpStatus.CREATED).body("생성되었습니다.");
+            response.setData(memoService.createMemo(memoDto, customUser.getMemberDto()));
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
         } catch (DataIntegrityViolationException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("잘못된 요청입니다.");
+            response.setMessage("잘못된 요청입니다.");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("서버 오류가 발생했습니다.");
+            response.setMessage("서버 오류가 발생했습니다.");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
 
     @PutMapping("/update")
-    public ResponseEntity<String > updateMemo(@RequestBody MemoDto memoDto, @AuthenticationPrincipal CustomUser customUser) {
+    public ResponseEntity<ResponseDto<MemoDto>> updateMemo(@RequestBody MemoDto memoDto, @AuthenticationPrincipal CustomUser customUser) {
+        ResponseDto<MemoDto> response = new ResponseDto<>();
+
         try {
-            memoService.updateMemo(memoDto, customUser.getMemberDto());
-            return ResponseEntity.status(HttpStatus.OK).body("수정되었습니다.");
+            response.setData(memoService.updateMemo(memoDto, customUser.getMemberDto()));
+            response.setMessage("수정되었습니다.");
+            return ResponseEntity.status(HttpStatus.OK).body(response);
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("메모를 찾지 못했습니다.");
+            response.setMessage("메모를 찾지 못했습니다.");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         } catch (DataIntegrityViolationException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("잘못된 요청입니다.");
+            response.setMessage("잘못된 요청입니다.");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("서버 오류가 발생했습니다.");
+            response.setMessage("서버 오류가 발생했습니다.");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
 
     @DeleteMapping("/delete")
-    public ResponseEntity<String> deleteMemo(@RequestBody MemoDto memoDto, @AuthenticationPrincipal CustomUser customUser) {
+    public ResponseEntity<ResponseDto<String>> deleteMemo(@RequestBody MemoDto memoDto, @AuthenticationPrincipal CustomUser customUser) {
+        ResponseDto<String> response = new ResponseDto<>();
+
         try {
             memoService.deleteMemo(memoDto, customUser.getMemberDto());
-            return ResponseEntity.status(HttpStatus.OK).body("삭제되었습니다.");
+            response.setMessage("삭제되었습니다.");
+            return ResponseEntity.status(HttpStatus.OK).body(response);
         } catch (EmptyResultDataAccessException ex) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("메모를 찾지 못했습니다.");
+            response.setMessage("메모를 찾지 못했습니다.");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("서버 오류가 발생했습니다.");
+            response.setMessage("서버 오류가 발생했습니다.");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
 }
