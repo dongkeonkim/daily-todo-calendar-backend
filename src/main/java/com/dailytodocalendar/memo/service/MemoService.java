@@ -45,8 +45,8 @@ public class MemoService {
     }
 
     @Transactional
-    public void deleteMemo(MemoDto memoDto, MemberDto memberDto) {
-        Memo memo = memoRepository.findByIdAndMemberId(memoDto.getId(), memberDto.getId())
+    public void deleteMemo(Long id, MemberDto memberDto) {
+        Memo memo = memoRepository.findByIdAndMemberId(id, memberDto.getId())
                 .orElseThrow(() -> new EmptyResultDataAccessException(HttpStatus.NOT_FOUND.value()));
 
         memoRepository.delete(memo);

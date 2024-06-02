@@ -75,12 +75,12 @@ public class MemoController {
         }
     }
 
-    @DeleteMapping("/delete")
-    public ResponseEntity<ResponseDto<String>> deleteMemo(@RequestBody MemoDto memoDto, @AuthenticationPrincipal CustomUser customUser) {
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<ResponseDto<String>> deleteMemo(@PathVariable("id") Long id, @AuthenticationPrincipal CustomUser customUser) {
         ResponseDto<String> response = new ResponseDto<>();
 
         try {
-            memoService.deleteMemo(memoDto, customUser.getMemberDto());
+            memoService.deleteMemo(id, customUser.getMemberDto());
             response.setMessage("삭제되었습니다.");
             return ResponseEntity.status(HttpStatus.OK).body(response);
         } catch (EmptyResultDataAccessException ex) {
