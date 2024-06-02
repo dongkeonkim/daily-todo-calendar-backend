@@ -39,7 +39,9 @@ public class MemoService {
         Memo memo = memoRepository.findByIdAndMemberId(memoDto.getId(), memberDto.getId())
                 .orElseThrow(IllegalArgumentException::new);
 
+        memoDto.getTodos().forEach(todoDto -> todoDto.setMemberId(memberDto.getId()));
         memo.update(memoDto);
+        memoRepository.save(memo);
 
         return memo.toDto();
     }

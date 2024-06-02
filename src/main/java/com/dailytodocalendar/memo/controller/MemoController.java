@@ -70,6 +70,7 @@ public class MemoController {
             response.setMessage("잘못된 요청입니다.");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
         } catch (Exception e) {
+            log.error(e.getMessage());
             response.setMessage("서버 오류가 발생했습니다.");
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
