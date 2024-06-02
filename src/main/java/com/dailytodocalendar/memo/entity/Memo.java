@@ -34,7 +34,7 @@ public class Memo {
     @Column(name = "memo_schedule_date")
     private LocalDateTime scheduleDate;
 
-    @OneToMany(mappedBy = "memo", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "memo", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Todo> todos = new ArrayList<>();
 
     @Column(name = "memo_reg_date")
