@@ -1,6 +1,7 @@
 package com.dailytodocalendar.memo.service;
 
 import com.dailytodocalendar.member.dto.MemberDto;
+import com.dailytodocalendar.memo.dto.CalendarDto;
 import com.dailytodocalendar.memo.dto.MemoDto;
 import com.dailytodocalendar.memo.entity.Memo;
 import com.dailytodocalendar.memo.repository.MemoRepository;
@@ -24,6 +25,11 @@ public class MemoService {
         return memoRepository.findAllByMemberId(memberDto.getId()).stream()
                 .map(Memo::toDto)
                 .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public List<CalendarDto> getTodoCountInCalendar(int year, long memberId) {
+        return memoRepository.getTodoCountInCalendar(year, memberId);
     }
 
     @Transactional

@@ -5,6 +5,7 @@ import com.dailytodocalendar.memo.dto.TodoDto;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,7 +33,7 @@ public class Memo {
     private String content;
 
     @Column(name = "memo_schedule_date")
-    private LocalDateTime scheduleDate;
+    private LocalDate scheduleDate;
 
     @OneToMany(mappedBy = "memo", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Todo> todos = new ArrayList<>();

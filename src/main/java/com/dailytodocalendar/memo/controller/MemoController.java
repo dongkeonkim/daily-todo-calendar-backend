@@ -2,6 +2,7 @@ package com.dailytodocalendar.memo.controller;
 
 import com.dailytodocalendar.common.ResponseDto;
 import com.dailytodocalendar.config.security.custom.CustomUser;
+import com.dailytodocalendar.memo.dto.CalendarDto;
 import com.dailytodocalendar.memo.dto.MemoDto;
 import com.dailytodocalendar.memo.service.MemoService;
 import lombok.RequiredArgsConstructor;
@@ -37,6 +38,15 @@ public class MemoController {
         response.setData(memoDtoList);
         response.setMessage("조회되었습니다.");
         return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+    @GetMapping("/calendar")
+    public ResponseDto<List<CalendarDto>> getTodoCountInCalendar(@RequestParam(required = false, value = "year") int year, @AuthenticationPrincipal CustomUser customUser) {
+        ResponseDto<List<CalendarDto>> response = new ResponseDto<>();
+
+        response.setData(memoService.getTodoCountInCalendar(year, customUser.getMemberDto().getId()));
+        response.setMessage("조회되었습니다.");
+        return response;
     }
 
     @PostMapping("/create")

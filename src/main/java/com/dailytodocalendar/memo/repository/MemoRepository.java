@@ -8,7 +8,7 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 import java.util.Optional;
 
-public interface MemoRepository extends JpaRepository<Memo, Long> {
+public interface MemoRepository extends JpaRepository<Memo, Long>, MemoRepositoryCustom {
 
     @Query("select m from Memo m left join fetch m.todos")
     List<Memo> findAllByMemberId(@Param("memberId") Long memberId);

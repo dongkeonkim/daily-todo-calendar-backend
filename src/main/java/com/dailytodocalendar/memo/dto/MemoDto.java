@@ -1,8 +1,10 @@
 package com.dailytodocalendar.memo.dto;
 
 import com.dailytodocalendar.memo.entity.Memo;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -18,7 +20,10 @@ public class MemoDto {
     private String title;
     private String content;
     private List<TodoDto> todos;
-    private LocalDateTime scheduleDate;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    private LocalDate scheduleDate;
+
     private LocalDateTime regDate;
     private LocalDateTime udtDate;
 
