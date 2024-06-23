@@ -1,10 +1,10 @@
 package com.dailytodocalendar.memo.repository;
 
 import com.dailytodocalendar.memo.dto.CalendarDto;
+import com.dailytodocalendar.memo.entity.Memo;
 import com.dailytodocalendar.memo.entity.QMemo;
 import com.dailytodocalendar.memo.entity.QTodo;
 import com.querydsl.core.types.Projections;
-import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +16,18 @@ import java.util.List;
 public class MemoRepositoryImpl implements MemoRepositoryCustom {
 
     private final JPAQueryFactory queryFactory;
+
+    @Override
+    public List<Memo> findAllByMemberIdAndDate(Long memberId, Integer year, LocalDate date) {
+        return queryFactory
+                .selectFrom(QMemo.memo)
+                .where(
+                        QMemo.memo.memberId.eq(memberId),
+                        year != null ? QMemo.memo.scheduleDate.year().eq(year) : null,
+                        date != null ? QMemo.memo.scheduleDate.eq(date) : null
+                )
+                .fetch();
+    }
 
     @Override
     public List<CalendarDto> getTodoCountInCalendar(Integer year, long memberId) {
@@ -40,11 +52,4 @@ public class MemoRepositoryImpl implements MemoRepositoryCustom {
                 .fetch();
     }
 
-    private BooleanExpression eqDate(LocalDate date) {
-        if (date == null) {
-            return QMemo.memo.scheduleDate.isNull();
-        } else {
-            return QMemo.memo.scheduleDate.eq(date);
-        }
-    }
 }

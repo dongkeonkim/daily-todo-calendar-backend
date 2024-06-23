@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Slf4j
@@ -24,11 +25,14 @@ public class MemoController {
 
     private final MemoService memoService;
 
-    @GetMapping("/all")
-    public ResponseEntity<ResponseDto<List<MemoDto>>> selectMemoAll(@AuthenticationPrincipal CustomUser customUser) {
+    @GetMapping("")
+    public ResponseEntity<ResponseDto<List<MemoDto>>> selectMemoAll(
+            @RequestParam(required = false, value = "year") Integer year,
+            @RequestParam(required = false, value = "date") LocalDate date,
+            @AuthenticationPrincipal CustomUser customUser) {
         ResponseDto<List<MemoDto>> response = new ResponseDto<>();
 
-        List<MemoDto> memoDtoList = memoService.selectMemoAll(customUser.getMemberDto());
+        List<MemoDto> memoDtoList = memoService.selectMemoAll(year, date, customUser.getMemberDto());
 
         if (memoDtoList.isEmpty()) {
             response.setMessage("메모가 없습니다.");

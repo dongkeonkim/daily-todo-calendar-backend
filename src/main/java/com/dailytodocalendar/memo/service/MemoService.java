@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -21,8 +22,8 @@ public class MemoService {
     private final MemoRepository memoRepository;
 
     @Transactional(readOnly = true)
-    public List<MemoDto> selectMemoAll(MemberDto memberDto) {
-        return memoRepository.findAllByMemberId(memberDto.getId()).stream()
+    public List<MemoDto> selectMemoAll(Integer year, LocalDate date, MemberDto memberDto) {
+        return memoRepository.findAllByMemberIdAndDate(memberDto.getId(), year, date).stream()
                 .map(Memo::toDto)
                 .collect(Collectors.toList());
     }
