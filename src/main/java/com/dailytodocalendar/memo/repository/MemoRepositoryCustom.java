@@ -6,6 +6,6 @@ import java.util.List;
 
 public interface MemoRepositoryCustom {
 
-    List<CalendarDto> getTodoCountInCalendar(int year, long memberId);
+    List<CalendarDto> getTodoCountInCalendar(Integer year, long memberId);
 
 }

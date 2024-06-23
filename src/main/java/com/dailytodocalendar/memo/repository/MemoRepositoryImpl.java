@@ -4,10 +4,12 @@ import com.dailytodocalendar.memo.dto.CalendarDto;
 import com.dailytodocalendar.memo.entity.QMemo;
 import com.dailytodocalendar.memo.entity.QTodo;
 import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -16,25 +18,33 @@ public class MemoRepositoryImpl implements MemoRepositoryCustom {
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public List<CalendarDto> getTodoCountInCalendar(int year, long memberId) {
-        QMemo memo = QMemo.memo;
-        QTodo todo = QTodo.todo;
-
+    public List<CalendarDto> getTodoCountInCalendar(Integer year, long memberId) {
         return queryFactory
                 .select(Projections.fields(CalendarDto.class,
-                        memo.scheduleDate.as("scheduleDate"),
-                        todo.id.count().as("totalCnt"),
+                        QMemo.memo.scheduleDate.as("scheduleDate"),
+                        QTodo.todo.id.count().as("totalCnt"),
                         new CaseBuilder()
-                                .when(todo.completed.eq(true))
+                                .when(QTodo.todo.completed.eq(true))
                                 .then(1L)
                                 .otherwise(0L)
                                 .sum()
                                 .as("successCnt"))) // 조건부 카운트를 바로 select 절에서 정의
-                .from(memo)
-                .leftJoin(todo).on(memo.id.eq(todo.memo.id))
-                .where(memo.scheduleDate.isNotNull())
-                .groupBy(memo.scheduleDate)
-                .orderBy(memo.scheduleDate.desc())
+                .from(QMemo.memo)
+                .leftJoin(QTodo.todo).on(QMemo.memo.id.eq(QTodo.todo.memo.id))
+                .where(
+                        QMemo.memo.memberId.eq(memberId),
+                        year != null ? QMemo.memo.scheduleDate.year().eq(year) : null
+                )
+                .groupBy(QMemo.memo.scheduleDate)
+                .orderBy(QMemo.memo.scheduleDate.asc())
                 .fetch();
+    }
+
+    private BooleanExpression eqDate(LocalDate date) {
+        if (date == null) {
+            return QMemo.memo.scheduleDate.isNull();
+        } else {
+            return QMemo.memo.scheduleDate.eq(date);
+        }
     }
 }

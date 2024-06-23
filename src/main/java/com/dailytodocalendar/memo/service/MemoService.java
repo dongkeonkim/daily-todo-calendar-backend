@@ -28,7 +28,7 @@ public class MemoService {
     }
 
     @Transactional
-    public List<CalendarDto> getTodoCountInCalendar(int year, long memberId) {
+    public List<CalendarDto> getTodoCountInCalendar(Integer year, long memberId) {
         return memoRepository.getTodoCountInCalendar(year, memberId);
     }
 

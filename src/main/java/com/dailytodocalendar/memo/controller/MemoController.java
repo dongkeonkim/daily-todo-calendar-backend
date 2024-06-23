@@ -41,7 +41,7 @@ public class MemoController {
     }
 
     @GetMapping("/calendar")
-    public ResponseDto<List<CalendarDto>> getTodoCountInCalendar(@RequestParam(required = false, value = "year") int year, @AuthenticationPrincipal CustomUser customUser) {
+    public ResponseDto<List<CalendarDto>> getTodoCountInCalendar(@RequestParam(required = false, value = "year") Integer year, @AuthenticationPrincipal CustomUser customUser) {
         ResponseDto<List<CalendarDto>> response = new ResponseDto<>();
 
         response.setData(memoService.getTodoCountInCalendar(year, customUser.getMemberDto().getId()));
