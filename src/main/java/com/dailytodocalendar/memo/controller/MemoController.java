@@ -2,7 +2,6 @@ package com.dailytodocalendar.memo.controller;
 
 import com.dailytodocalendar.common.ResponseDto;
 import com.dailytodocalendar.config.security.custom.CustomUser;
-import com.dailytodocalendar.memo.dto.CalendarDto;
 import com.dailytodocalendar.memo.dto.MemoDto;
 import com.dailytodocalendar.memo.service.MemoService;
 import lombok.RequiredArgsConstructor;
@@ -15,7 +14,9 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @RestController
@@ -45,10 +46,13 @@ public class MemoController {
     }
 
     @GetMapping("/calendar")
-    public ResponseDto<List<CalendarDto>> getTodoCountInCalendar(@RequestParam(required = false, value = "year") Integer year, @AuthenticationPrincipal CustomUser customUser) {
-        ResponseDto<List<CalendarDto>> response = new ResponseDto<>();
+    public ResponseDto<Map<String, Object>> getTodoCountInCalendar(@RequestParam(required = false, value = "year") Integer year, @AuthenticationPrincipal CustomUser customUser) {
+        ResponseDto<Map<String, Object>> response = new ResponseDto<>();
+        Map<String, Object> result = new HashMap<>();
+        result.put("calendar", memoService.getTodoCountInCalendar(year, customUser.getMemberDto().getId()));
+        result.put("years", memoService.getTodoCompleteYears(customUser.getMemberDto().getId()));
 
-        response.setData(memoService.getTodoCountInCalendar(year, customUser.getMemberDto().getId()));
+        response.setData(result);
         response.setMessage("조회되었습니다.");
         return response;
     }

@@ -23,7 +23,7 @@ public class MemoRepositoryImpl implements MemoRepositoryCustom {
                 .selectFrom(QMemo.memo)
                 .where(
                         QMemo.memo.memberId.eq(memberId),
-                        year != null ? QMemo.memo.scheduleDate.year().eq(year) : null,
+                        year != null ? QMemo.memo.scheduleDate.year().eq(year) : QMemo.memo.scheduleDate.year().isNull(),
                         date != null ? QMemo.memo.scheduleDate.eq(date) : null
                 )
                 .fetch();
@@ -45,7 +45,7 @@ public class MemoRepositoryImpl implements MemoRepositoryCustom {
                 .leftJoin(QTodo.todo).on(QMemo.memo.id.eq(QTodo.todo.memo.id))
                 .where(
                         QMemo.memo.memberId.eq(memberId),
-                        year != null ? QMemo.memo.scheduleDate.year().eq(year) : null
+                        year != null ? QMemo.memo.scheduleDate.year().eq(year) : QMemo.memo.scheduleDate.year().isNull()
                 )
                 .groupBy(QMemo.memo.scheduleDate)
                 .orderBy(QMemo.memo.scheduleDate.asc())

@@ -34,6 +34,13 @@ public class MemoService {
     }
 
     @Transactional
+    public List<String> getTodoCompleteYears(long memberId) {
+        List<String> years = memoRepository.getTodoCompleteYears(memberId);
+        years.add("미지정");
+        return years;
+    }
+
+    @Transactional
     public MemoDto createMemo(MemoDto memoDto, MemberDto memberDto) {
         memoDto.setMemberId(memberDto.getId());
         memoDto.getTodos().forEach(todoDto -> todoDto.setMemberId(memberDto.getId()));
