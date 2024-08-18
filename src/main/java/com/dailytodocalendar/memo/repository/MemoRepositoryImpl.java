@@ -1,9 +1,11 @@
 package com.dailytodocalendar.memo.repository;
 
 import com.dailytodocalendar.memo.dto.CalendarDto;
+import com.dailytodocalendar.memo.dto.MemoDto;
 import com.dailytodocalendar.memo.entity.Memo;
 import com.dailytodocalendar.memo.entity.QMemo;
 import com.dailytodocalendar.memo.entity.QTodo;
+import com.dailytodocalendar.memo.entity.Todo;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -11,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 public class MemoRepositoryImpl implements MemoRepositoryCustom {
@@ -18,15 +21,29 @@ public class MemoRepositoryImpl implements MemoRepositoryCustom {
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public List<Memo> findAllByMemberIdAndDate(Long memberId, Integer year, LocalDate date) {
-        return queryFactory
+    public List<MemoDto> findAllByMemberIdAndDate(Long memberId, Integer year, LocalDate date) {
+        List<Memo> memos = queryFactory
                 .selectFrom(QMemo.memo)
-                .where(
-                        QMemo.memo.memberId.eq(memberId),
-                        year != null ? QMemo.memo.scheduleDate.year().eq(year) : QMemo.memo.scheduleDate.year().isNull(),
-                        date != null ? QMemo.memo.scheduleDate.eq(date) : null
-                )
+                .leftJoin(QMemo.memo.todos, QTodo.todo).fetchJoin()
+                .where(QMemo.memo.memberId.eq(memberId),
+                        year != null ? QMemo.memo.scheduleDate.year().eq(year) : null,
+                        date != null ? QMemo.memo.scheduleDate.eq(date) : null)
                 .fetch();
+
+        return memos.stream()
+                .map(memo -> MemoDto.builder()
+                        .id(memo.getId())
+                        .memberId(memo.getMemberId())
+                        .title(memo.getTitle())
+                        .content(memo.getContent())
+                        .todos(memo.getTodos().stream()
+                                .map(Todo::toDto)
+                                .collect(Collectors.toList()))
+                        .scheduleDate(memo.getScheduleDate())
+                        .regDate(memo.getRegDate())
+                        .udtDate(memo.getUdtDate())
+                        .build())
+                .collect(Collectors.toList());
     }
 
     @Override

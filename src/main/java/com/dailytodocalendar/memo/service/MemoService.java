@@ -23,9 +23,7 @@ public class MemoService {
 
     @Transactional(readOnly = true)
     public List<MemoDto> selectMemoAll(Integer year, LocalDate date, MemberDto memberDto) {
-        return memoRepository.findAllByMemberIdAndDate(memberDto.getId(), year, date).stream()
-                .map(Memo::toDto)
-                .collect(Collectors.toList());
+        return memoRepository.findAllByMemberIdAndDate(memberDto.getId(), year, date);
     }
 
     @Transactional
