@@ -32,4 +32,16 @@ public class TodoDto {
                 .build();
     }
 
+    public Todo toUpdateEntity() {
+        return Todo.builder()
+                .id(id)
+                .memberId(memberId)
+                .content(content)
+                .completed(completed)
+                .memo(Memo.builder().id(memoId).build())
+                .todoRegDate(todoRegDate)
+                .todoUdtDate(LocalDateTime.now())
+                .build();
+    }
+
 }

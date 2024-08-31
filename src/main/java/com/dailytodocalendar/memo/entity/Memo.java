@@ -61,7 +61,7 @@ public class Memo {
 
     public void update(MemoDto memoDto) {
         List<Todo> todos = memoDto.getTodos() != null ? memoDto.getTodos().stream()
-                .map(TodoDto::toEntity)
+                .map(TodoDto::toUpdateEntity)
                 .toList() : List.of();
 
         this.title = memoDto.getTitle();
