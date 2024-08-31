@@ -40,10 +40,12 @@ public class Member {
 
     public void updatePassword(String password) {
         this.password = password;
+        this.udtDate = LocalDateTime.now();
     }
 
     public void changeEnable(int enable) {
         this.enable = enable;
+        this.udtDate = LocalDateTime.now();
     }
 
     public MemberDto toDto() {
