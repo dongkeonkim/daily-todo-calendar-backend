@@ -13,7 +13,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -34,7 +33,7 @@ public class MemoService {
     @Transactional
     public List<String> getTodoCompleteYears(long memberId) {
         List<String> years = memoRepository.getTodoCompleteYears(memberId);
-        years.add("미지정");
+        years.add("전체");
         return years;
     }
 

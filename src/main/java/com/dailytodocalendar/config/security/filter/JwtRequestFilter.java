@@ -36,10 +36,16 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
         Authentication authentication = jwtTokenProvider.getAuthentication(jwt);
 
-        if (jwtTokenProvider.validateToken(jwt)) {
-            log.info("유효한 JWT 토큰");
-
-            SecurityContextHolder.getContext().setAuthentication(authentication);
+        try {
+            if (jwtTokenProvider.validateToken(jwt)) {
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+            } else {
+                response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+                return;
+            }
+        } catch (Exception e) {
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+            return;
         }
 
         filterChain.doFilter(request, response);
