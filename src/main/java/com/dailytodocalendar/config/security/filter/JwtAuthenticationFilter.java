@@ -1,8 +1,8 @@
 package com.dailytodocalendar.config.security.filter;
 
+import com.dailytodocalendar.api.member.dto.MemberDto;
 import com.dailytodocalendar.config.security.constants.SecurityConstants;
 import com.dailytodocalendar.config.security.custom.CustomUser;
-import com.dailytodocalendar.member.dto.MemberDto;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -22,16 +22,12 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     private final AuthenticationManager authenticationManager;
     private final JwtTokenProvider jwtTokenProvider;
 
-    {
-        setFilterProcessesUrl("/login");
-    }
-
     /**
      * 사용자 인증 여부 확인
      */
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) {
-        String username = request.getParameter("username");
+        String username = request.getParameter("email");
         String password = request.getParameter("password");
 
         Authentication authentication = new UsernamePasswordAuthenticationToken(username, password);

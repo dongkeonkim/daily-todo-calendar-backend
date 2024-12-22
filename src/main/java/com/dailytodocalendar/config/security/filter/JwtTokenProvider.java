@@ -1,10 +1,10 @@
 package com.dailytodocalendar.config.security.filter;
 
-import com.dailytodocalendar.config.security.custom.CustomUser;
+import com.dailytodocalendar.api.member.dto.MemberDto;
+import com.dailytodocalendar.api.member.repository.MemberRepository;
+import com.dailytodocalendar.common.codes.ErrorCode;
 import com.dailytodocalendar.config.security.constants.SecurityConstants;
-import com.dailytodocalendar.member.dto.MemberDto;
-import com.dailytodocalendar.member.entity.Member;
-import com.dailytodocalendar.member.repository.MemberRepository;
+import com.dailytodocalendar.config.security.custom.CustomUser;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
@@ -16,7 +16,6 @@ import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
-import java.util.Optional;
 
 @Slf4j
 @Component
@@ -65,19 +64,9 @@ public class JwtTokenProvider {
             Object roles = claims.get("role");
             log.info("roles: " + roles);
 
-            MemberDto memberDto = new MemberDto();
-
-            try {
-                Optional<Member> member = memberRepository.findByEmailAndEnable(email, 1);
-                member.ifPresent(m -> {
-                    memberDto.setId(m.getId());
-                    memberDto.setRole(m.getRole());
-                    memberDto.setEmail(m.getEmail());
-                    memberDto.setPassword(m.getPassword());
-                });
-            } catch (Exception e) {
-                log.error("토큰 유효 -> DB 추가 정보 조회시 에러 발생");
-            }
+            MemberDto memberDto = memberRepository.findByEmailAndDelYn(email, false)
+                    .map(MemberDto::fromEntity)
+                    .orElseThrow(() -> new IllegalArgumentException(ErrorCode.USER_NOT_FOUND.getMessage()));
 
             UserDetails userDetails = new CustomUser(memberDto);
             return new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());

@@ -1,6 +1,6 @@
 package com.dailytodocalendar.config.security.custom;
 
-import com.dailytodocalendar.member.dto.MemberDto;
+import com.dailytodocalendar.api.member.dto.MemberDto;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
@@ -55,6 +55,6 @@ public class CustomUser implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return memberDto.getEnable() != 0;
+        return memberDto.getDelYn();
     }
 }
