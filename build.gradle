@@ -47,6 +47,7 @@ dependencies {
 
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.security:spring-security-test'
+	testImplementation 'org.junit.jupiter:junit-jupiter:5.10.0'
 }
 
 def querydslDir = "$buildDir/generated/querydsl"
@@ -57,6 +58,10 @@ sourceSets {
 
 tasks.withType(JavaCompile) {
 	options.annotationProcessorGeneratedSourcesDirectory = file(querydslDir)
+}
+
+tasks.test {
+	useJUnitPlatform()
 }
 
 clean.doLast {
