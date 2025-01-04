@@ -32,7 +32,4 @@ logging:
     sql: debug
     org.hibernate.orm.jdbc.bind: trace
 
-file:
-  name: ""
-
 secret-key: "Iz*%8`Meukzodgl:v';Bj[(<;/k%J~Z-(Z;'q;Eig>hZDl2J@/w&gX@[U,[?W%Fg"
