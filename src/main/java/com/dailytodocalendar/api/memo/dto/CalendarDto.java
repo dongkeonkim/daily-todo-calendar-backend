@@ -15,4 +15,12 @@ public class CalendarDto {
     Long successCnt;
     Long totalCnt;
 
+    @Override
+    public String toString() {
+        return "CalendarDto{" +
+                "scheduleDate=" + scheduleDate +
+                ", successCnt=" + successCnt +
+                ", totalCnt=" + totalCnt +
+                '}';
+    }
 }

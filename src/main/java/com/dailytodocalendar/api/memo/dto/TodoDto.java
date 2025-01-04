@@ -44,4 +44,16 @@ public class TodoDto {
                 .build();
     }
 
+    @Override
+    public String toString() {
+        return "TodoDto{" +
+                "id=" + id +
+                ", memberId=" + memberId +
+                ", content='" + content + '\'' +
+                ", completed=" + completed +
+                ", memoId=" + memoId +
+                ", todoRegDate=" + todoRegDate +
+                ", todoUdtDate=" + todoUdtDate +
+                '}';
+    }
 }

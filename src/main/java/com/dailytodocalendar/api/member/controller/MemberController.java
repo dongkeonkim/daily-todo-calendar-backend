@@ -25,7 +25,6 @@ public class MemberController {
         );
     }
 
-
     @PutMapping("/update")
     public ResponseDto<Void> update(@AuthenticationPrincipal CustomUser customUser, @RequestBody MemberUpdateDto memberUpdateDto) {
         memberService.updateMember(customUser.getMemberDto(), memberUpdateDto);

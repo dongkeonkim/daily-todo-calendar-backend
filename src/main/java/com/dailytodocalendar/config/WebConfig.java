@@ -1,4 +1,4 @@
-package com.dailytodocalendar.config.security.config;
+package com.dailytodocalendar.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;

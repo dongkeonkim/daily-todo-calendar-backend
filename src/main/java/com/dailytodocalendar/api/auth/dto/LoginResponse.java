@@ -13,4 +13,10 @@ public class LoginResponse {
         return loginResponse;
     }
 
+    @Override
+    public String toString() {
+        return "LoginResponse{" +
+                "accessToken='" + accessToken + '\'' +
+                '}';
+    }
 }

@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
@@ -43,6 +44,7 @@ public class JwtTokenProvider {
         return jwt;
     }
 
+    @Transactional(readOnly = true)
     public UsernamePasswordAuthenticationToken getAuthentication(String authHeader) {
         if (authHeader == null || authHeader.isEmpty()) {
             return null;

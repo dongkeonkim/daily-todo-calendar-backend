@@ -48,6 +48,19 @@ public class MemoDto {
         return memo;
     }
 
+    @Override
+    public String toString() {
+        return "MemoDto{" +
+                "id=" + id +
+                ", memberId=" + memberId +
+                ", title='" + title + '\'' +
+                ", content='" + content + '\'' +
+                ", todos=" + todos +
+                ", scheduleDate=" + scheduleDate +
+                ", regDate=" + regDate +
+                ", udtDate=" + udtDate +
+                '}';
+    }
 }
 
 

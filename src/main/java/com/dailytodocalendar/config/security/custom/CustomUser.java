@@ -57,4 +57,11 @@ public class CustomUser implements UserDetails {
     public boolean isEnabled() {
         return memberDto.getDelYn();
     }
+
+    @Override
+    public String toString() {
+        return "CustomUser{" +
+                "memberDto=" + memberDto +
+                '}';
+    }
 }

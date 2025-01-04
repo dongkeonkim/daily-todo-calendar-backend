@@ -1,63 +1,61 @@
 <configuration>
+    <!-- 공통 설정 -->
+    <property name="LOG_DIR" value="./logs" />
+    <property name="APP_NAME" value="my-app" />
 
-    <!-- Spring Profile에 따른 로깅 설정 -->
-    <springProfile name="local">
-        <property name="LOG_LEVEL" value="DEBUG" />
-    </springProfile>
-
-    <springProfile name="dev">
-        <property name="LOG_PATH" value="./logs" />
-        <property name="LOG_LEVEL" value="DEBUG" />
-    </springProfile>
-
-    <springProfile name="prod">
-        <property name="LOG_PATH" value="/var/log/myapp" />
-        <property name="LOG_LEVEL" value="INFO" />
-    </springProfile>
-
-    <!-- 로그 패턴 정의 -->
-    <property name="LOG_PATTERN"
-              value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n" />
-
-    <!-- 콘솔 로그 -->
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <pattern>${LOG_PATTERN}</pattern>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n</pattern>
         </encoder>
     </appender>
 
-    <!-- 파일 로그 (dev, prod 전용) -->
-    <springProfile name="dev,prod">
-        <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-            <file>${LOG_PATH}/application.log</file>
-            <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-                <!-- 일별 로그 파일 생성 -->
-                <fileNamePattern>${LOG_PATH}/application.%d{yyyy-MM-dd}.log</fileNamePattern>
-                <!-- 로그 보관 기간: 30일 -->
-                <maxHistory>30</maxHistory>
-            </rollingPolicy>
-            <encoder>
-                <pattern>${LOG_PATTERN}</pattern>
-            </encoder>
-        </appender>
+    <logger name="org.hibernate.SQL" level="DEBUG" />
+    <logger name="org.hibernate.type.descriptor.sql.BasicBinder" level="TRACE" />
+
+    <!-- 로컬 환경 -->
+    <springProfile name="local">
+        <root level="DEBUG">
+            <appender-ref ref="CONSOLE" />
+        </root>
     </springProfile>
 
-    <!-- 로그 레벨 별 설정 -->
-    <logger name="com.dailytodocalendar" level="${LOG_LEVEL}" additivity="false">
-        <appender-ref ref="CONSOLE" />
-        <springProfile name="dev,prod">
-            <appender-ref ref="FILE" />
-        </springProfile>
-    </logger>
+    <!-- 개발 환경 -->
+    <springProfile name="dev">
+        <appender name="DEV_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+            <file>${LOG_DIR}/${APP_NAME}-dev.log</file>
+            <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+                <fileNamePattern>${LOG_DIR}/${APP_NAME}-dev-%d{yyyy-MM-dd}.log</fileNamePattern>
+                <maxHistory>7</maxHistory>
+            </rollingPolicy>
+            <encoder>
+                <pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n</pattern>
+            </encoder>
+        </appender>
+        <root level="INFO">
+            <appender-ref ref="CONSOLE" />
+            <appender-ref ref="DEV_FILE" />
+        </root>
+    </springProfile>
 
-    <!-- Spring 기본 로그 -->
-    <logger name="org.springframework" level="INFO" />
+    <!-- 운영 환경 -->
+    <springProfile name="prod">
+        <appender name="PROD_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+            <file>${LOG_DIR}/${APP_NAME}.log</file>
+            <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+                <fileNamePattern>${LOG_DIR}/${APP_NAME}-%d{yyyy-MM-dd}.log</fileNamePattern>
+                <maxHistory>30</maxHistory>
+                <totalSizeCap>1GB</totalSizeCap>
+            </rollingPolicy>
+            <encoder>
+                <pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n</pattern>
+            </encoder>
+        </appender>
+        <root level="INFO">
+            <appender-ref ref="PROD_FILE" />
+        </root>
 
-    <!-- ROOT 로거 설정 -->
-    <root level="${LOG_LEVEL}">
-        <appender-ref ref="CONSOLE" />
-        <springProfile name="dev,prod">
-            <appender-ref ref="FILE" />
-        </springProfile>
-    </root>
+        <logger name="org.hibernate.SQL" level="INFO" />
+        <logger name="org.hibernate.type.descriptor.sql.BasicBinder" level="INFO" />
+    </springProfile>
+
 </configuration>
