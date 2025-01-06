@@ -1,5 +1,7 @@
 package com.dailytodocalendar.api.member.entity;
 
+import com.dailytodocalendar.api.member.dto.MemberUpdateDto;
+import com.mysql.cj.util.StringUtils;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -31,8 +33,11 @@ public class Member {
 
     private LocalDateTime udtDate;
 
-    public void updatePassword(String password, PasswordEncoder passwordEncoder) {
-        this.password = passwordEncoder.encode(password);
+    public void updateMember(MemberUpdateDto memberUpdateDto, PasswordEncoder passwordEncoder) {
+        this.name = memberUpdateDto.getName();
+        if (!StringUtils.isNullOrEmpty(memberUpdateDto.getNewPassword())) {
+            this.password = passwordEncoder.encode(memberUpdateDto.getNewPassword());
+        }
         this.udtDate = LocalDateTime.now();
     }
 

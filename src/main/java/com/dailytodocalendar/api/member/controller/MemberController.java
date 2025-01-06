@@ -1,5 +1,6 @@
 package com.dailytodocalendar.api.member.controller;
 
+import com.dailytodocalendar.api.member.dto.MemberDeleteDto;
 import com.dailytodocalendar.api.member.dto.MemberDto;
 import com.dailytodocalendar.api.member.dto.MemberUpdateDto;
 import com.dailytodocalendar.api.member.service.MemberService;
@@ -32,8 +33,8 @@ public class MemberController {
     }
 
     @PutMapping("/delete")
-    public ResponseDto<Void> delete(@RequestBody MemberDto memberDto) {
-        memberService.deleteMember(memberDto);
+    public ResponseDto<Void> delete(@RequestBody MemberDeleteDto memberDeleteDto) {
+        memberService.deleteMember(memberDeleteDto);
         return ResponseDto.success(SuccessCode.DELETED);
     }
 }
