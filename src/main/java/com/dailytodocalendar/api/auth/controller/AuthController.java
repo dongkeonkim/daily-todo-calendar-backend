@@ -6,6 +6,7 @@ import com.dailytodocalendar.api.auth.dto.SignUpRequest;
 import com.dailytodocalendar.api.auth.service.AuthService;
 import com.dailytodocalendar.common.codes.SuccessCode;
 import com.dailytodocalendar.common.response.ResponseDto;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -22,7 +23,7 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/signUp")
-    public ResponseDto<Void> signUp(@RequestBody SignUpRequest SignUpRequest) {
+    public ResponseDto<Void> signUp(@Valid @RequestBody SignUpRequest SignUpRequest) {
         authService.signUp(SignUpRequest);
         return ResponseDto.success(SuccessCode.CREATED);
     }

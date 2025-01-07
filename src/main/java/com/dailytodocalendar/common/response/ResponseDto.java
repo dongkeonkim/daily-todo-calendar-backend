@@ -24,8 +24,11 @@ public class ResponseDto<T> {
         return new ResponseDto<>(successCode.name(), successCode.getMessage(), null, LocalDateTime.now());
     }
 
+    public static <T> ResponseDto<T> error(ErrorCode errorCode, T result) {
+        return new ResponseDto<>(errorCode.name(), errorCode.getMessage(), result, LocalDateTime.now());
+    }
+
     public static ResponseDto<Void> error(ErrorCode errorCode) {
         return new ResponseDto<>(errorCode.name(), errorCode.getMessage(), null, LocalDateTime.now());
     }
-
 }
