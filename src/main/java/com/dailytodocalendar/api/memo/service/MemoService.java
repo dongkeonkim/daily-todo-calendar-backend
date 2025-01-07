@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.Year;
 import java.util.List;
 
 @Service
@@ -34,7 +35,14 @@ public class MemoService {
     @Transactional(readOnly = true)
     public List<String> getTodoCompleteYears(long memberId) {
         List<String> years = memoRepository.getTodoCompleteYears(memberId);
+        String year = String.valueOf(Year.now().getValue());
+
+        if (!years.contains(year)) {
+            years.add(year);
+        }
+
         years.add("전체");
+
         return years;
     }
 
