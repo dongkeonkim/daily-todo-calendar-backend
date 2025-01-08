@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/memo?serverTimezone=UTC
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: password
+      SPRING_REDIS_HOST: redis
+    depends_on:
+      - db
+      - redis
+    container_name: spring-boot-app
+
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: memo
+    ports:
+      - "3306:3306"
+    container_name: mysql-container
+    volumes:
+      - db_data:/var/lib/mysql
+
+  redis:
+    image: redis:7.0
+    ports:
+      - "6379:6379"
+    container_name: redis-container
+
+volumes:
+  db_data:
