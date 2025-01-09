@@ -26,6 +26,12 @@ spring:
       hibernate:
         format_sql: false
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+
 logging:
   level:
     root: INFO

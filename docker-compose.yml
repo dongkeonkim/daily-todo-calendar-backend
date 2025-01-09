@@ -13,9 +13,31 @@ services:
       SPRING_DATASOURCE_PASSWORD: password
       SPRING_REDIS_HOST: redis
     depends_on:
-      - db
-      - redis
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     container_name: spring-boot-app
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 10s
+      retries: 5
+      timeout: 5s
+
+  frontend:
+    build:
+      context: ../daily-todo-calendar-frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    volumes:
+      - ../daily-todo-calendar-frontend:/usr/src/app  # 개발 환경에서만 사용
+    environment:
+      REACT_APP_API_URL: http://spring-boot-app:8080  # Docker Compose 네트워크 내부에서 동작
+    container_name: frontend-container
+    depends_on:
+      app:
+        condition: service_healthy
 
   db:
     image: mysql:8.0
@@ -27,12 +49,22 @@ services:
     container_name: mysql-container
     volumes:
       - db_data:/var/lib/mysql
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+      interval: 10s
+      retries: 5
+      timeout: 5s
 
   redis:
     image: redis:7.0
     ports:
       - "6379:6379"
     container_name: redis-container
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 10s
+      retries: 5
+      timeout: 5s
 
 volumes:
   db_data:

@@ -43,6 +43,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(request -> request
                         .requestMatchers("/").permitAll()
                         .requestMatchers("/auth/**").permitAll()
+                        .requestMatchers("/actuator/health").permitAll()
                         .requestMatchers("/h2-console/**").permitAll()
                         .requestMatchers("/member/**").hasRole("USER")
                         .requestMatchers("/memo/**").hasRole("USER")
