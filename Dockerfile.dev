@@ -1,0 +1,21 @@
+# 개발 환경: JDK 이미지 사용
+FROM eclipse-temurin:17-jdk
+
+# 작업 디렉토리 설정
+WORKDIR /app
+
+# Gradle Wrapper와 설정 파일 복사
+COPY gradlew settings.gradle build.gradle ./
+COPY gradle ./gradle
+
+# Gradle 종속성 다운로드 (캐싱 최적화)
+RUN ./gradlew dependencies --no-daemon
+
+# 소스 코드 복사
+COPY src ./src
+
+# 디버그 포트와 애플리케이션 기본 포트 노출
+EXPOSE 5005 8080
+
+# 디버그 및 핫 리로드 활성화
+ENTRYPOINT ["./gradlew", "bootRun", "--no-daemon", "--debug-jvm"]
