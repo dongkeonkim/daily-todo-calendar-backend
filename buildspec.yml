@@ -1,0 +1,20 @@
+version: 0.2
+
+phases:
+  install:
+    commands:
+      - echo Installing dependencies...
+      - ./gradlew dependencies
+  build:
+    commands:
+      - echo Running tests...
+      - ./gradlew test
+      - echo Building the project...
+      - ./gradlew build -x test
+artifacts:
+  files:
+    - build/libs/*.jar
+  discard-paths: yes
+environment:
+  computeType: BUILD_GENERAL1_SMALL
+  image: amazoncorretto:17
