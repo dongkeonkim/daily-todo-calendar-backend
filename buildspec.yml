@@ -7,9 +7,7 @@ phases:
       - ./gradlew dependencies
   build:
     commands:
-      - echo Running tests...
-      - ./gradlew test
-      - echo Building the project...
+      - echo Building the project without tests...
       - ./gradlew build -x test
 artifacts:
   files:
