@@ -12,10 +12,8 @@ phases:
       - echo Successfully logged in to Amazon ECR
   build:
     commands:
-      - echo Building the project without tests...
-      - ./gradlew build -x test
-      - echo Building the Docker image...
-      - docker build -t daily-todo-calendar-backend .
+      - echo Building the Docker image using Dockerfile.prd...
+      - docker build -t daily-todo-calendar-backend -f Dockerfile.prd .
       - docker tag daily-todo-calendar-backend:latest 329409317911.dkr.ecr.ap-northeast-2.amazonaws.com/daily-todo-calendar-backend:latest
   post_build:
     commands:
@@ -31,3 +29,7 @@ artifacts:
 environment:
   computeType: BUILD_GENERAL1_SMALL
   image: aws/codebuild/amazonlinux2-x86_64-standard:4.0
+
+cache:
+  paths:
+    - '~/.gradle/**/*'
