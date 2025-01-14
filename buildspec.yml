@@ -5,6 +5,8 @@ phases:
     commands:
       - echo Installing dependencies...
       - ./gradlew assemble
+      - nohup /usr/local/bin/dockerd-entrypoint.sh &>/tmp/docker.log &
+      - timeout 15 sh -c "until docker info; do echo .; sleep 1; done"
   pre_build:
     commands:
       - echo Logging in to Amazon ECR...
@@ -12,8 +14,9 @@ phases:
       - echo Successfully logged in to Amazon ECR
   build:
     commands:
-      - echo Building the Docker image using Dockerfile.prd...
+      - echo Building the Docker image...
       - docker build -t daily-todo-calendar-backend -f Dockerfile.prd .
+      - echo Tagging the Docker image...
       - docker tag daily-todo-calendar-backend:latest 329409317911.dkr.ecr.ap-northeast-2.amazonaws.com/daily-todo-calendar-backend:latest
   post_build:
     commands:
@@ -25,12 +28,6 @@ phases:
 artifacts:
   files:
     - imagedefinitions.json
-    - build/libs/*.jar
-  discard-paths: yes
-
-environment:
-  computeType: BUILD_GENERAL1_SMALL
-  image: aws/codebuild/standard:6.0
 
 cache:
   paths:
