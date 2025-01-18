@@ -39,3 +39,47 @@ logging:
     org.hibernate.orm.jdbc.bind: trace
 
 secret-key: "Iz*%8`Meukzodgl:v';Bj[(<;/k%J~Z-(Z;'q;Eig>hZDl2J@/w&gX@[U,[?W%Fg"
+
+---
+
+spring:
+  config:
+    activate:
+      on-profile: prod
+  datasource:
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 5
+      idle-timeout: 30000
+      max-lifetime: 1800000
+      connection-timeout: 30000
+  data:
+    redis:
+      host: ${SPRING_REDIS_HOST}
+      port: 6379
+  jpa:
+    database-platform: org.hibernate.dialect.MySQLDialect
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: false
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+
+logging:
+  level:
+    root: WARN
+    com.daily.todo: INFO
+    org.hibernate.orm.jdbc.bind: INFO
+
+secret-key: ${JWT_SECRET_KEY}
