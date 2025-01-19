@@ -78,7 +78,7 @@ management:
 
 logging:
   level:
-    root: WARN
+    root: DEBUG
     com.daily.todo: INFO
     org.hibernate.orm.jdbc.bind: INFO
 
