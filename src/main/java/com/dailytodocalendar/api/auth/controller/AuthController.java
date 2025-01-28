@@ -22,7 +22,7 @@ public class AuthController {
 
     private final AuthService authService;
 
-    @PostMapping("/signUp")
+    @PostMapping("/sign-up")
     public ResponseDto<Void> signUp(@Valid @RequestBody SignUpRequest SignUpRequest) {
         authService.signUp(SignUpRequest);
         return ResponseDto.success(SuccessCode.CREATED);
