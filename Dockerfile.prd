@@ -1,5 +1,5 @@
 # Build 단계
-FROM eclipse-temurin:17-jdk-alpine AS builder
+FROM --platform=linux/amd64 amazoncorretto:17-alpine AS builder
 
 # 작업 디렉토리 설정
 WORKDIR /app
@@ -8,20 +8,38 @@ WORKDIR /app
 COPY gradlew settings.gradle build.gradle ./
 COPY gradle ./gradle
 
+# Gradle 실행 권한 설정
+RUN chmod +x ./gradlew
+
 # Gradle 종속성 다운로드 (캐싱 최적화)
 RUN ./gradlew dependencies --no-daemon
 
 # 소스 코드 복사
 COPY src ./src
 
-# Gradle
-RUN ./gradlew bootJar -Pprod --no-daemon
+# Gradle 빌드
+RUN ./gradlew bootJar --no-daemon
 
 # Runtime 단계
-FROM eclipse-temurin:17-jre-alpine
+FROM --platform=linux/amd64 amazoncorretto:17-alpine
 
-# 보안을 위한 non-root 사용자 생성
-RUN addgroup -S spring && adduser -S spring -G spring
+# SSH 서버 설치 및 필요한 패키지 설치
+RUN apk add --no-cache openssh-server sudo shadow
+
+# SSH 설정
+RUN ssh-keygen -A
+RUN mkdir -p /home/spring/.ssh
+RUN echo "PermitRootLogin no" >> /etc/ssh/sshd_config
+RUN echo "PasswordAuthentication no" >> /etc/ssh/sshd_config
+
+# 보안을 위한 spring 사용자 생성 (수정된 부분)
+RUN adduser -D -s /bin/sh spring && \
+    echo "spring:spring" | chpasswd && \
+    addgroup spring wheel && \
+    passwd -u spring  # 계정 잠금 해제
+
+# sudoers 설정
+RUN echo "%wheel ALL=(ALL) NOPASSWD: /usr/sbin/sshd" >> /etc/sudoers
 
 # 작업 디렉토리 설정
 WORKDIR /app
@@ -29,9 +47,14 @@ WORKDIR /app
 # 빌드된 JAR 파일 복사
 COPY --from=builder /app/build/libs/*.jar app.jar
 
+# SSH 키 설정
+COPY authorized_keys /home/spring/.ssh/authorized_keys
+RUN chown -R spring:spring /home/spring/.ssh && \
+    chmod 700 /home/spring/.ssh && \
+    chmod 600 /home/spring/.ssh/authorized_keys
+
 # 적절한 권한 설정
 RUN chown -R spring:spring /app
-USER spring
 
 # 환경 변수 설정 (운영 환경 프로파일)
 ENV SPRING_PROFILES_ACTIVE=prod
@@ -40,5 +63,11 @@ ENV SPRING_PROFILES_ACTIVE=prod
 HEALTHCHECK --interval=30s --timeout=3s \
   CMD wget -q --spider http://localhost:8080/actuator/health || exit 1
 
-# JVM 최적화
-ENTRYPOINT ["java", "-Xms512m", "-Xmx1024m", "-XX:+UseG1GC", "-Dspring.profiles.active=${SPRING_PROFILES_ACTIVE}", "-Dspring.config.location=classpath:/application.yml,optional:/app/config/application.yml", "-jar", "app.jar"]
+# entrypoint 스크립트 설정
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+USER spring
+
+# entrypoint 실행
+ENTRYPOINT ["/entrypoint.sh"]
