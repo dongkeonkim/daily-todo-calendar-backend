@@ -1,30 +1,27 @@
 # Build 단계
 FROM --platform=linux/amd64 amazoncorretto:17-alpine AS builder
 
-# 작업 디렉토리 설정
 WORKDIR /app
 
-# Gradle Wrapper와 설정 파일 복사
 COPY gradlew settings.gradle build.gradle ./
 COPY gradle ./gradle
-
-# Gradle 실행 권한 설정
 RUN chmod +x ./gradlew
-
-# Gradle 종속성 다운로드 (캐싱 최적화)
 RUN ./gradlew dependencies --no-daemon
 
-# 소스 코드 복사
 COPY src ./src
-
-# Gradle 빌드
 RUN ./gradlew bootJar --no-daemon
 
 # Runtime 단계
 FROM --platform=linux/amd64 amazoncorretto:17-alpine
 
-# SSH 서버 설치 및 필요한 패키지 설치
-RUN apk add --no-cache openssh-server sudo shadow curl
+# 필요한 패키지 설치
+RUN apk add --no-cache openssh-server sudo shadow curl libcap certbot
+
+# Certbot 설정을 위한 디렉토리 생성
+RUN mkdir -p /etc/letsencrypt
+RUN mkdir -p /var/lib/letsencrypt
+RUN mkdir -p /var/log/letsencrypt
+RUN mkdir -p /webroot
 
 # SSH 설정
 RUN ssh-keygen -A
@@ -32,34 +29,22 @@ RUN mkdir -p /home/spring/.ssh
 RUN echo "PermitRootLogin no" >> /etc/ssh/sshd_config
 RUN echo "PasswordAuthentication no" >> /etc/ssh/sshd_config
 
-# 보안을 위한 spring 사용자 생성 (수정된 부분)
+# spring 사용자 생성
 RUN adduser -D -s /bin/sh spring && \
     echo "spring:spring" | chpasswd && \
     addgroup spring wheel && \
-    passwd -u spring  # 계정 잠금 해제
+    passwd -u spring
 
 # sudoers 설정
 RUN echo "%wheel ALL=(ALL) NOPASSWD: /usr/sbin/sshd" >> /etc/sudoers
+RUN echo "%wheel ALL=(ALL) NOPASSWD: /usr/bin/certbot" >> /etc/sudoers
 
-# 작업 디렉토리 설정
 WORKDIR /app
 
-# 빌드된 JAR 파일 복사
+# 애플리케이션 파일 복사
 COPY --from=builder /app/build/libs/*.jar app.jar
 
-# SSL 인증서 복사 부분 추가
-COPY keystore.p12 /app/keystore.p12
-RUN chown spring:spring /app/keystore.p12 && \
-    chmod 600 /app/keystore.p12
-
-# HEALTHCHECK 부분 수정 (기존 8080 포트를 443으로 변경)
-HEALTHCHECK --interval=30s --timeout=3s \
-  CMD curl -k https://localhost:443/actuator/health || exit 1
-
-# 포트 EXPOSE 추가
-EXPOSE 443
-
-# DDNS 업데이트 스크립트 복사 및 설정
+# DDNS 스크립트 설정
 COPY ddns-update.sh /app/ddns-update.sh
 RUN chmod +x /app/ddns-update.sh && \
     chown spring:spring /app/ddns-update.sh
@@ -70,21 +55,32 @@ RUN chown -R spring:spring /home/spring/.ssh && \
     chmod 700 /home/spring/.ssh && \
     chmod 600 /home/spring/.ssh/authorized_keys
 
-# 적절한 권한 설정
+# 권한 설정
 RUN chown -R spring:spring /app
+RUN chown -R spring:spring /etc/letsencrypt
+RUN chown -R spring:spring /var/lib/letsencrypt
+RUN chown -R spring:spring /var/log/letsencrypt
+RUN chown -R spring:spring /webroot
 
-# 환경 변수 설정 (운영 환경 프로파일)
+# 443 포트 바인딩 권한 부여
+RUN setcap 'cap_net_bind_service=+ep' $(readlink -f $(which java))
+
 ENV SPRING_PROFILES_ACTIVE=prod
 
-# 헬스체크 설정
+# 하나의 HEALTHCHECK만 유지 (SSL)
 HEALTHCHECK --interval=30s --timeout=3s \
-  CMD wget -q --spider http://localhost:8080/actuator/health || exit 1
+  CMD curl -k https://localhost:443/actuator/health || exit 1
 
-# entrypoint 스크립트 설정
+# Let's Encrypt 인증서 갱신 스크립트
+COPY renew-cert.sh /app/renew-cert.sh
+RUN chmod +x /app/renew-cert.sh
+
+# entrypoint 설정
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
 USER spring
 
-# entrypoint 실행
+EXPOSE 443 80
+
 ENTRYPOINT ["/entrypoint.sh"]
