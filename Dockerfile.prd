@@ -24,7 +24,7 @@ RUN ./gradlew bootJar --no-daemon
 FROM --platform=linux/amd64 amazoncorretto:17-alpine
 
 # SSH 서버 설치 및 필요한 패키지 설치
-RUN apk add --no-cache openssh-server sudo shadow
+RUN apk add --no-cache openssh-server sudo shadow curl
 
 # SSH 설정
 RUN ssh-keygen -A
@@ -46,6 +46,23 @@ WORKDIR /app
 
 # 빌드된 JAR 파일 복사
 COPY --from=builder /app/build/libs/*.jar app.jar
+
+# SSL 인증서 복사 부분 추가
+COPY keystore.p12 /app/keystore.p12
+RUN chown spring:spring /app/keystore.p12 && \
+    chmod 600 /app/keystore.p12
+
+# HEALTHCHECK 부분 수정 (기존 8080 포트를 443으로 변경)
+HEALTHCHECK --interval=30s --timeout=3s \
+  CMD curl -k https://localhost:443/actuator/health || exit 1
+
+# 포트 EXPOSE 추가
+EXPOSE 443
+
+# DDNS 업데이트 스크립트 복사 및 설정
+COPY ddns-update.sh /app/ddns-update.sh
+RUN chmod +x /app/ddns-update.sh && \
+    chown spring:spring /app/ddns-update.sh
 
 # SSH 키 설정
 COPY authorized_keys /home/spring/.ssh/authorized_keys
