@@ -1,41 +1,49 @@
 #!/bin/sh
 
-# 도메인 이름이 설정되어 있는지 확인
-if [ -z "$DOMAIN_NAME" ]; then
-    echo "Error: DOMAIN_NAME environment variable is not set"
-    exit 1
+# sshd 시작 전에 호스트키 확인
+if [ ! -f /etc/ssh/ssh_host_rsa_key ]; then
+    ssh-keygen -A -f /etc
 fi
 
-# sshd 시작 시도를 로깅
+# sshd 시작
 echo "Starting sshd..."
 sudo /usr/sbin/sshd
 echo "sshd start attempted"
 
-# DDNS 업데이트 스크립트를 백그라운드로 실행
+# DDNS 업데이트 실행
 echo "Starting DDNS update process..."
-(while true; do /app/ddns-update.sh; sleep 1800; done) &
+/app/ddns-update.sh >> /var/log/ddns/update.log 2>&1 &
 echo "DDNS update process started"
 
-# Let's Encrypt 인증서 발급 (최초 실행시)
+# DNS 전파 대기
+echo "Waiting for DNS propagation..."
+sleep 30
+
+# Let's Encrypt 인증서 발급
 if [ ! -d "/etc/letsencrypt/live/${DOMAIN_NAME}" ]; then
-    sudo certbot certonly --standalone \
+    sudo -E certbot certonly --standalone \
         --non-interactive \
         --agree-tos \
         --email ${SSL_EMAIL} \
         -d ${DOMAIN_NAME} \
         --http-01-port=80
 
+    # 권한 설정 추가
+    sudo chown -R spring:spring /etc/letsencrypt/live
+    sudo chmod -R 750 /etc/letsencrypt/live
+
     # 인증서를 PKCS12 형식으로 변환
-    openssl pkcs12 -export \
+    sudo openssl pkcs12 -export \
         -in /etc/letsencrypt/live/${DOMAIN_NAME}/fullchain.pem \
         -inkey /etc/letsencrypt/live/${DOMAIN_NAME}/privkey.pem \
         -out /etc/letsencrypt/live/${DOMAIN_NAME}/keystore.p12 \
         -name tomcat \
         -password pass:${SSL_KEY_STORE_PASSWORD}
-fi
 
-# 백그라운드에서 인증서 자동 갱신 스크립트 실행
-/app/renew-cert.sh &
+    # keystore.p12 파일 권한 설정
+    sudo chown spring:spring /etc/letsencrypt/live/${DOMAIN_NAME}/keystore.p12
+    sudo chmod 640 /etc/letsencrypt/live/${DOMAIN_NAME}/keystore.p12
+fi
 
 # Spring Boot 애플리케이션 실행
 exec java -Xms512m -Xmx1024m -XX:+UseG1GC \

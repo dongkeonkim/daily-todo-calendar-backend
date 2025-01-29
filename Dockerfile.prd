@@ -1,5 +1,5 @@
 # Build 단계
-FROM --platform=linux/amd64 amazoncorretto:17-alpine AS builder
+FROM --platform=linux/amd64 eclipse-temurin:17-jdk AS builder
 
 WORKDIR /app
 
@@ -12,33 +12,41 @@ COPY src ./src
 RUN ./gradlew bootJar --no-daemon
 
 # Runtime 단계
-FROM --platform=linux/amd64 amazoncorretto:17-alpine
+FROM --platform=linux/amd64 eclipse-temurin:17-jre
 
 # 필요한 패키지 설치
-RUN apk add --no-cache openssh-server sudo shadow curl libcap certbot openssl
-RUN apk add --no-cache libc6-compat
+RUN apt-get update && apt-get install -y \
+    openssh-server \
+    sudo \
+    curl \
+    certbot \
+    openssl \
+    wget \
+    libcap2-bin \
+    && rm -rf /var/lib/apt/lists/*
 
 # Certbot 설정을 위한 디렉토리 생성
-RUN mkdir -p /etc/letsencrypt
-RUN mkdir -p /var/lib/letsencrypt
-RUN mkdir -p /var/log/letsencrypt
-RUN mkdir -p /webroot
+RUN mkdir -p /etc/letsencrypt \
+    /var/lib/letsencrypt \
+    /var/log/letsencrypt \
+    /webroot \
+    /run/sshd
 
 # SSH 설정
-RUN ssh-keygen -A
-RUN mkdir -p /home/spring/.ssh
-RUN echo "PermitRootLogin no" >> /etc/ssh/sshd_config
-RUN echo "PasswordAuthentication no" >> /etc/ssh/sshd_config
+RUN mkdir -p /etc/ssh && \
+    ssh-keygen -A && \
+    mkdir -p /home/spring/.ssh && \
+    echo "PermitRootLogin no" >> /etc/ssh/sshd_config && \
+    echo "PasswordAuthentication no" >> /etc/ssh/sshd_config
 
-# spring 사용자 생성
-RUN adduser -D -s /bin/sh spring && \
+# spring 사용자 생성 (Debian 방식)
+RUN useradd -m -s /bin/bash spring && \
     echo "spring:spring" | chpasswd && \
-    addgroup spring wheel && \
-    passwd -u spring
+    usermod -aG sudo spring
 
 # sudoers 설정
-RUN echo "%wheel ALL=(ALL) NOPASSWD: /usr/sbin/sshd" >> /etc/sudoers
-RUN echo "%wheel ALL=(ALL) NOPASSWD: /usr/bin/certbot" >> /etc/sudoers
+RUN echo 'spring ALL=(ALL) NOPASSWD: ALL' > /etc/sudoers.d/spring && \
+    chmod 440 /etc/sudoers.d/spring
 
 WORKDIR /app
 
@@ -50,6 +58,10 @@ COPY ddns-update.sh /app/ddns-update.sh
 RUN chmod +x /app/ddns-update.sh && \
     chown spring:spring /app/ddns-update.sh
 
+# DDNS 로그 디렉토리 생성 및 권한 설정
+RUN mkdir -p /var/log/ddns && \
+    chown -R spring:spring /var/log/ddns
+
 # SSH 키 설정
 COPY authorized_keys /home/spring/.ssh/authorized_keys
 RUN chown -R spring:spring /home/spring/.ssh && \
@@ -57,11 +69,11 @@ RUN chown -R spring:spring /home/spring/.ssh && \
     chmod 600 /home/spring/.ssh/authorized_keys
 
 # 권한 설정
-RUN chown -R spring:spring /app
-RUN chown -R spring:spring /etc/letsencrypt
-RUN chown -R spring:spring /var/lib/letsencrypt
-RUN chown -R spring:spring /var/log/letsencrypt
-RUN chown -R spring:spring /webroot
+RUN chown -R spring:spring /app \
+    /etc/letsencrypt \
+    /var/lib/letsencrypt \
+    /var/log/letsencrypt \
+    /webroot
 
 # 443 포트 바인딩 권한 부여
 RUN setcap 'cap_net_bind_service=+ep' $(readlink -f $(which java))
