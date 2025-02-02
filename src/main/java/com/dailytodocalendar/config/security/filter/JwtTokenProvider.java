@@ -33,7 +33,7 @@ public class JwtTokenProvider {
                 .signWith(getShaKey(), Jwts.SIG.HS512)
                 .header().add("typ", SecurityConstants.TOKEN_TYPE)
                 .and()
-                .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24 * 5))
+                .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 2))
                 .claim("uid", uuid)
                 .claim("email", email)
                 .claim("role", roles)
