@@ -11,11 +11,8 @@ services:
       SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/memo?serverTimezone=UTC
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: password
-      SPRING_REDIS_HOST: redis
     depends_on:
       db:
-        condition: service_healthy
-      redis:
         condition: service_healthy
     container_name: spring-boot-app
     healthcheck:
@@ -51,17 +48,6 @@ services:
       - db_data:/var/lib/mysql
     healthcheck:
       test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
-      interval: 10s
-      retries: 5
-      timeout: 5s
-
-  redis:
-    image: redis:7.0
-    ports:
-      - "6379:6379"
-    container_name: redis-container
-    healthcheck:
-      test: [ "CMD", "redis-cli", "ping" ]
       interval: 10s
       retries: 5
       timeout: 5s
