@@ -14,7 +14,7 @@ RUN ./gradlew bootJar --no-daemon
 # Runtime 단계
 FROM eclipse-temurin:17-jre
 
-# 필요한 패키지만 설치 (SSL 관련 패키지 제거)
+# 필요한 패키지만 설치
 RUN apt-get update && apt-get install -y \
     curl \
     && rm -rf /var/lib/apt/lists/*
@@ -32,9 +32,9 @@ ENV SSL_ENABLED=false
 # 고정 포트 노출
 EXPOSE 8080
 
-# 헬스체크 설정 (고정 포트 사용)
+# 헬스체크 설정
 HEALTHCHECK --interval=30s --timeout=3s \
   CMD curl -f http://localhost:8080/actuator/health || exit 1
 
-# 시스템 속성으로 환경 변수 전달
-ENTRYPOINT ["java", "-Xms512m", "-Xmx1024m", "-XX:+UseG1GC", "-Dserver.port=${PORT}", "-Dserver.ssl.enabled=${SSL_ENABLED}", "-jar", "/app/app.jar"]
+# 애플리케이션 실행
+CMD ["java", "-Xms512m", "-Xmx1024m", "-XX:+UseG1GC", "-Dserver.port=8080", "-Dserver.ssl.enabled=false", "-Dspring.profiles.active=prod", "-jar", "/app/app.jar"]
