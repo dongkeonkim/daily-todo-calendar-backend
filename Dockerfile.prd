@@ -1,94 +1,36 @@
 # Build 단계
-FROM eclipse-temurin:17-jdk AS builder
+FROM --platform=linux/amd64 eclipse-temurin:17-jdk AS builder
 
 WORKDIR /app
 
-# 그래들 파일만 먼저 복사해서 의존성 캐싱
 COPY gradlew settings.gradle build.gradle ./
 COPY gradle ./gradle
 RUN chmod +x ./gradlew
 RUN ./gradlew dependencies --no-daemon
 
-# 소스 코드 복사 및 빌드
 COPY src ./src
 RUN ./gradlew bootJar --no-daemon
 
 # Runtime 단계
-FROM eclipse-temurin:17-jre
+FROM --platform=linux/amd64 eclipse-temurin:17-jre
 
-# 필요한 패키지를 한 번에 설치하고 캐시 정리
+# 필요한 패키지만 설치 (SSL 관련 패키지 제거)
 RUN apt-get update && apt-get install -y \
-    openssh-server \
-    sudo \
     curl \
-    certbot \
-    openssl \
-    wget \
-    libcap2-bin \
-    && rm -rf /var/lib/apt/lists/* \
-    && mkdir -p /etc/letsencrypt \
-       /var/lib/letsencrypt \
-       /var/log/letsencrypt \
-       /webroot \
-       /run/sshd
+    && rm -rf /var/lib/apt/lists/*
 
-# SSH 관련 설정 통합
-RUN mkdir -p /etc/ssh && \
-    ssh-keygen -A && \
-    mkdir -p /home/spring/.ssh && \
-    echo "PermitRootLogin no" >> /etc/ssh/sshd_config && \
-    echo "PasswordAuthentication no" >> /etc/ssh/sshd_config && \
-    # spring 사용자 생성
-    useradd -m -s /bin/bash spring && \
-    echo "spring:spring" | chpasswd && \
-    usermod -aG sudo spring && \
-    # sudoers 설정
-    echo 'spring ALL=(ALL) NOPASSWD: ALL' > /etc/sudoers.d/spring && \
-    chmod 440 /etc/sudoers.d/spring
-
-# 작업 디렉토리 설정
 WORKDIR /app
 
 # 애플리케이션 파일 복사
 COPY --from=builder /app/build/libs/*.jar app.jar
 
-# 스크립트 파일 복사 및 권한 설정
-COPY ddns-update.sh renew-cert.sh entrypoint.sh /app/
-RUN chmod +x /app/*.sh && \
-    # DDNS 로그 디렉토리 생성
-    mkdir -p /var/log/ddns && \
-    # 443 포트 바인딩 권한 부여
-    setcap 'cap_net_bind_service=+ep' $(readlink -f $(which java))
+ENV SPRING_PROFILES_ACTIVE=prod
 
-# SSH 키 설정
-RUN mkdir -p /home/spring/.ssh && \
-    chmod 700 /home/spring/.ssh
-
-# authorized_keys 파일 복사
-COPY authorized_keys /home/spring/.ssh/authorized_keys
-
-# 권한 설정
-RUN chown -R spring:spring /home/spring/.ssh && \
-    chmod 600 /home/spring/.ssh/authorized_keys
-
-# 권한 설정 통합
-RUN chown -R spring:spring /app \
-    /etc/letsencrypt \
-    /var/lib/letsencrypt \
-    /var/log/letsencrypt \
-    /var/log/ddns \
-    /webroot
-
-# 환경 변수 설정
-ENV SPRING_PROFILES_ACTIVE=prod \
-    JAVA_OPTS="-Xms512m -Xmx1024m -XX:+UseG1GC"
-
-# 헬스체크 간소화
+# 헬스체크 설정 (HTTP 사용)
 HEALTHCHECK --interval=30s --timeout=3s \
-  CMD curl -k https://127.0.0.1:443/actuator/health || exit 1
+  CMD curl -f http://localhost:${PORT:-8080}/actuator/health || exit 1
 
-USER spring
+EXPOSE ${PORT:-8080}
 
-EXPOSE 443 80
-
-ENTRYPOINT ["/app/entrypoint.sh"]
+# 간단한 시작 명령어로 변경
+ENTRYPOINT ["java", "-Xms512m", "-Xmx1024m", "-XX:+UseG1GC", "-jar", "/app/app.jar"]

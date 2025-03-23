@@ -39,6 +39,5 @@ out/
 src/main/generated
 
 # SSH Keys
-authorized_keys
 *.pub
 *_key

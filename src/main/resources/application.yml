@@ -74,14 +74,7 @@ spring:
         format_sql: false
 
 server:
-  port: 443
-  ssl:
-    enabled: true
-    key-store: file:/etc/letsencrypt/live/${DOMAIN_NAME}/keystore.p12
-    key-store-type: PKCS12
-    key-store-password: ${SSL_KEY_STORE_PASSWORD}
-  http:
-    port: 80
+  port: ${PORT:8080}
 
 management:
   endpoints:
