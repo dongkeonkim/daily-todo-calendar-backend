@@ -1,5 +1,5 @@
 # Build 단계
-FROM --platform=linux/amd64 eclipse-temurin:17-jdk AS builder
+FROM eclipse-temurin:17-jdk AS builder
 
 WORKDIR /app
 
@@ -12,7 +12,7 @@ COPY src ./src
 RUN ./gradlew bootJar --no-daemon
 
 # Runtime 단계
-FROM --platform=linux/amd64 eclipse-temurin:17-jre
+FROM eclipse-temurin:17-jre
 
 # 필요한 패키지만 설치 (SSL 관련 패키지 제거)
 RUN apt-get update && apt-get install -y \
