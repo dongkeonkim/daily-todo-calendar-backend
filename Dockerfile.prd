@@ -1,20 +1,22 @@
 # Build 단계
-FROM --platform=linux/amd64 eclipse-temurin:17-jdk AS builder
+FROM eclipse-temurin:17-jdk AS builder
 
 WORKDIR /app
 
+# 그래들 파일만 먼저 복사해서 의존성 캐싱
 COPY gradlew settings.gradle build.gradle ./
 COPY gradle ./gradle
 RUN chmod +x ./gradlew
 RUN ./gradlew dependencies --no-daemon
 
+# 소스 코드 복사 및 빌드
 COPY src ./src
 RUN ./gradlew bootJar --no-daemon
 
 # Runtime 단계
-FROM --platform=linux/amd64 eclipse-temurin:17-jre
+FROM eclipse-temurin:17-jre
 
-# 필요한 패키지 설치
+# 필요한 패키지를 한 번에 설치하고 캐시 정리
 RUN apt-get update && apt-get install -y \
     openssh-server \
     sudo \
@@ -23,77 +25,70 @@ RUN apt-get update && apt-get install -y \
     openssl \
     wget \
     libcap2-bin \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/* \
+    && mkdir -p /etc/letsencrypt \
+       /var/lib/letsencrypt \
+       /var/log/letsencrypt \
+       /webroot \
+       /run/sshd
 
-# Certbot 설정을 위한 디렉토리 생성
-RUN mkdir -p /etc/letsencrypt \
-    /var/lib/letsencrypt \
-    /var/log/letsencrypt \
-    /webroot \
-    /run/sshd
-
-# SSH 설정
+# SSH 관련 설정 통합
 RUN mkdir -p /etc/ssh && \
     ssh-keygen -A && \
     mkdir -p /home/spring/.ssh && \
     echo "PermitRootLogin no" >> /etc/ssh/sshd_config && \
-    echo "PasswordAuthentication no" >> /etc/ssh/sshd_config
-
-# spring 사용자 생성 (Debian 방식)
-RUN useradd -m -s /bin/bash spring && \
+    echo "PasswordAuthentication no" >> /etc/ssh/sshd_config && \
+    # spring 사용자 생성
+    useradd -m -s /bin/bash spring && \
     echo "spring:spring" | chpasswd && \
-    usermod -aG sudo spring
-
-# sudoers 설정
-RUN echo 'spring ALL=(ALL) NOPASSWD: ALL' > /etc/sudoers.d/spring && \
+    usermod -aG sudo spring && \
+    # sudoers 설정
+    echo 'spring ALL=(ALL) NOPASSWD: ALL' > /etc/sudoers.d/spring && \
     chmod 440 /etc/sudoers.d/spring
 
+# 작업 디렉토리 설정
 WORKDIR /app
 
 # 애플리케이션 파일 복사
 COPY --from=builder /app/build/libs/*.jar app.jar
 
-# DDNS 스크립트 설정
-COPY ddns-update.sh /app/ddns-update.sh
-RUN chmod +x /app/ddns-update.sh && \
-    chown spring:spring /app/ddns-update.sh
-
-# DDNS 로그 디렉토리 생성 및 권한 설정
-RUN mkdir -p /var/log/ddns && \
-    chown -R spring:spring /var/log/ddns
+# 스크립트 파일 복사 및 권한 설정
+COPY ddns-update.sh renew-cert.sh entrypoint.sh /app/
+RUN chmod +x /app/*.sh && \
+    # DDNS 로그 디렉토리 생성
+    mkdir -p /var/log/ddns && \
+    # 443 포트 바인딩 권한 부여
+    setcap 'cap_net_bind_service=+ep' $(readlink -f $(which java))
 
 # SSH 키 설정
+RUN mkdir -p /home/spring/.ssh && \
+    chmod 700 /home/spring/.ssh
+
+# authorized_keys 파일 복사
 COPY authorized_keys /home/spring/.ssh/authorized_keys
-RUN chown -R spring:spring /home/spring/.ssh && \
-    chmod 700 /home/spring/.ssh && \
-    chmod 600 /home/spring/.ssh/authorized_keys
 
 # 권한 설정
+RUN chown -R spring:spring /home/spring/.ssh && \
+    chmod 600 /home/spring/.ssh/authorized_keys
+
+# 권한 설정 통합
 RUN chown -R spring:spring /app \
     /etc/letsencrypt \
     /var/lib/letsencrypt \
     /var/log/letsencrypt \
+    /var/log/ddns \
     /webroot
 
-# 443 포트 바인딩 권한 부여
-RUN setcap 'cap_net_bind_service=+ep' $(readlink -f $(which java))
+# 환경 변수 설정
+ENV SPRING_PROFILES_ACTIVE=prod \
+    JAVA_OPTS="-Xms512m -Xmx1024m -XX:+UseG1GC"
 
-ENV SPRING_PROFILES_ACTIVE=prod
-
-# 하나의 HEALTHCHECK만 유지 (SSL)
+# 헬스체크 간소화
 HEALTHCHECK --interval=30s --timeout=3s \
-  CMD curl -k https://localhost:443/actuator/health || exit 1
-
-# Let's Encrypt 인증서 갱신 스크립트
-COPY renew-cert.sh /app/renew-cert.sh
-RUN chmod +x /app/renew-cert.sh
-
-# entrypoint 설정
-COPY entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
+  CMD curl -k https://127.0.0.1:443/actuator/health || exit 1
 
 USER spring
 
 EXPOSE 443 80
 
-ENTRYPOINT ["/entrypoint.sh"]
+ENTRYPOINT ["/app/entrypoint.sh"]

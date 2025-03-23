@@ -8,7 +8,7 @@ services:
     ports:
       - "8080:8080"
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/memo?serverTimezone=UTC
+      SPRING_DATASOURCE_URL: jdbc:postgre://db:3306/memo?serverTimezone=UTC
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: password
     depends_on:
@@ -16,7 +16,7 @@ services:
         condition: service_healthy
     container_name: spring-boot-app
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      test: ["CMD", "curl", "-f", "http://127.0.0.1:8080/actuator/health"]
       interval: 10s
       retries: 5
       timeout: 5s
@@ -37,17 +37,18 @@ services:
         condition: service_healthy
 
   db:
-    image: mysql:8.0
+    image: postgres:14
     environment:
-      MYSQL_ROOT_PASSWORD: password
-      MYSQL_DATABASE: memo
+      POSTGRES_PASSWORD: password
+      POSTGRES_USER: postgres
+      POSTGRES_DB: memo
     ports:
-      - "3306:3306"
-    container_name: mysql-container
+      - "5432:5432"
+    container_name: postgres-container
     volumes:
-      - db_data:/var/lib/mysql
+      - db_data:/var/lib/postgresql/data
     healthcheck:
-      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 10s
       retries: 5
       timeout: 5s

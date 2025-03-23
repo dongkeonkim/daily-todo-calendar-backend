@@ -6,7 +6,7 @@ Todo Calendar의 백엔드 서버 저장소입니다.
 이 프로젝트는 Frontend와 Backend 저장소로 분리되어 있습니다:
 
 - Backend Repository (현재 저장소)
-  - 기술 스택: Spring Boot, MySQL, JWT
+  - 기술 스택: Spring Boot, PostgreSQL, JWT
   - API 서버 및 데이터베이스 관리
 
 - [Frontend Repository](https://github.com/dongkeonkim/daily-todo-calendar-frontend)
@@ -26,5 +26,5 @@ Frontend 애플리케이션의 주요 기능을 아래에서 확인하실 수 �
 
 ## Backend 기술 스택
 - 프레임워크 및 ORM: Spring Boot, Spring Data JPA
-- 데이터베이스: MySQL, Redis
+- 데이터베이스: PostgreSQL
 - 인증: JWT, SSL/TLS 지원 (운영 환경)

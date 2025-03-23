@@ -1,7 +1,7 @@
 package com.dailytodocalendar.api.member.entity;
 
 import com.dailytodocalendar.api.member.dto.MemberUpdateDto;
-import com.mysql.cj.util.StringUtils;
+import com.querydsl.core.util.StringUtils;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
