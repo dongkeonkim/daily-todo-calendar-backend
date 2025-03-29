@@ -12,42 +12,42 @@ import org.springframework.security.core.context.SecurityContextHolder;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class SecurityUtils {
 
-    public static String getCurrentUserEmail() {
-        return getCurrentUser().getEmail();
+  public static String getCurrentUserEmail() {
+    return getCurrentUser().getEmail();
+  }
+
+  public static Long getCurrentUserId() {
+    return getCurrentUser().getId();
+  }
+
+  public static MemberDto getCurrentUser() {
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+    if (authentication == null
+        || !authentication.isAuthenticated()
+        || authentication.getPrincipal().equals("anonymousUser")) {
+      throw new ApplicationException(ErrorCode.INVALID_TOKEN);
     }
 
-    public static Long getCurrentUserId() {
-        return getCurrentUser().getId();
+    Object principal = authentication.getPrincipal();
+    if (!(principal instanceof CustomUser)) {
+      throw new ApplicationException(ErrorCode.INVALID_TOKEN);
     }
 
-    public static MemberDto getCurrentUser() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    return ((CustomUser) principal).getMemberDto();
+  }
 
-        if (authentication == null || !authentication.isAuthenticated() ||
-                authentication.getPrincipal().equals("anonymousUser")) {
-            throw new ApplicationException(ErrorCode.INVALID_TOKEN);
-        }
+  public static boolean isAuthenticated() {
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    return authentication != null
+        && authentication.isAuthenticated()
+        && !authentication.getPrincipal().equals("anonymousUser");
+  }
 
-        Object principal = authentication.getPrincipal();
-        if (!(principal instanceof CustomUser)) {
-            throw new ApplicationException(ErrorCode.INVALID_TOKEN);
-        }
-
-        return ((CustomUser) principal).getMemberDto();
-    }
-
-    public static boolean isAuthenticated() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        return authentication != null &&
-                authentication.isAuthenticated() &&
-                !authentication.getPrincipal().equals("anonymousUser");
-    }
-
-    public static boolean hasRole(String role) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        return authentication != null &&
-                authentication.isAuthenticated() &&
-                authentication.getAuthorities().stream()
-                        .anyMatch(a -> a.getAuthority().equals(role));
-    }
+  public static boolean hasRole(String role) {
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    return authentication != null
+        && authentication.isAuthenticated()
+        && authentication.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals(role));
+  }
 }

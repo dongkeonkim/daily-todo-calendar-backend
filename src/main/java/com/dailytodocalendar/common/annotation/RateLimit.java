@@ -10,11 +10,11 @@ import java.util.concurrent.TimeUnit;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface RateLimit {
 
-    int limit() default 20;
+  int limit() default 20;
 
-    long duration() default 1;
+  long duration() default 1;
 
-    TimeUnit unit() default TimeUnit.MINUTES;
+  TimeUnit unit() default TimeUnit.MINUTES;
 
-    String key() default "ip";
+  String key() default "ip";
 }

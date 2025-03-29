@@ -6,6 +6,5 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class MemberRepositoryImpl implements MemberRepositoryCustom {
 
-    private final JPAQueryFactory queryFactory;
-
+  private final JPAQueryFactory queryFactory;
 }

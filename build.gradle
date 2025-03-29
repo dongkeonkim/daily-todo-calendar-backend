@@ -91,6 +91,12 @@ spotless {
 		removeUnusedImports()
 		trimTrailingWhitespace()
 		endWithNewline()
+
+		// 자동 생성된 코드는 스타일 검사에서 제외
+		targetExclude "build/generated/**", "**/generated/**", "**/generated-sources/**"
+
+		// QueryDSL 관련 파일만 명시적으로 제외
+		targetExclude "**/Q*.java"
 	}
 }
 

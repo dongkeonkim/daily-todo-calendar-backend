@@ -15,28 +15,34 @@ import org.springframework.context.annotation.Profile;
 @Profile("!prod")
 public class OpenApiConfig {
 
-    @Bean
-    public OpenAPI openAPI() {
-        final String securitySchemeName = "bearerAuth";
+  @Bean
+  public OpenAPI openAPI() {
+    final String securitySchemeName = "bearerAuth";
 
-        return new OpenAPI()
-                .info(new Info()
-                        .title("Todo Calendar API")
-                        .description("Daily Todo Calendar Backend API Documentation")
-                        .version("v1.0.0")
-                        .contact(new Contact()
-                                .name("Todo Calendar Team")
-                                .url("https://github.com/dongkeonkim/daily-todo-calendar-backend")
-                                .email("support@dailytodocalendar.com"))
-                        .license(new License()
-                                .name("Apache 2.0")
-                                .url("https://www.apache.org/licenses/LICENSE-2.0.html")))
-                .addSecurityItem(new SecurityRequirement().addList(securitySchemeName))
-                .components(new Components()
-                        .addSecuritySchemes(securitySchemeName, new SecurityScheme()
-                                .name(securitySchemeName)
-                                .type(SecurityScheme.Type.HTTP)
-                                .scheme("bearer")
-                                .bearerFormat("JWT")));
-    }
+    return new OpenAPI()
+        .info(
+            new Info()
+                .title("Todo Calendar API")
+                .description("Daily Todo Calendar Backend API Documentation")
+                .version("v1.0.0")
+                .contact(
+                    new Contact()
+                        .name("Todo Calendar Team")
+                        .url("https://github.com/dongkeonkim/daily-todo-calendar-backend")
+                        .email("support@dailytodocalendar.com"))
+                .license(
+                    new License()
+                        .name("Apache 2.0")
+                        .url("https://www.apache.org/licenses/LICENSE-2.0.html")))
+        .addSecurityItem(new SecurityRequirement().addList(securitySchemeName))
+        .components(
+            new Components()
+                .addSecuritySchemes(
+                    securitySchemeName,
+                    new SecurityScheme()
+                        .name(securitySchemeName)
+                        .type(SecurityScheme.Type.HTTP)
+                        .scheme("bearer")
+                        .bearerFormat("JWT")));
+  }
 }

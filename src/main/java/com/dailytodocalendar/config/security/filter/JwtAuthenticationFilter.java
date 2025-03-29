@@ -19,46 +19,44 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
-    private final AuthenticationManager authenticationManager;
-    private final JwtTokenProvider jwtTokenProvider;
+  private final AuthenticationManager authenticationManager;
+  private final JwtTokenProvider jwtTokenProvider;
 
-    /**
-     * 사용자 인증 여부 확인
-     */
-    @Override
-    public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) {
-        String username = request.getParameter("email");
-        String password = request.getParameter("password");
+  /** 사용자 인증 여부 확인 */
+  @Override
+  public Authentication attemptAuthentication(
+      HttpServletRequest request, HttpServletResponse response) {
+    String username = request.getParameter("email");
+    String password = request.getParameter("password");
 
-        Authentication authentication = new UsernamePasswordAuthenticationToken(username, password);
+    Authentication authentication = new UsernamePasswordAuthenticationToken(username, password);
 
-        try {
-            authentication = authenticationManager.authenticate(authentication);
-            log.info("인증 여부: " + authentication.isAuthenticated());
-        } catch (AuthenticationException e) {
-            log.warn(e.getMessage());
-        }
-
-        return authentication;
+    try {
+      authentication = authenticationManager.authenticate(authentication);
+      log.info("인증 여부: " + authentication.isAuthenticated());
+    } catch (AuthenticationException e) {
+      log.warn(e.getMessage());
     }
 
-    /**
-     * 인증 성공시
-     * - JWT 토큰 생성
-     * - JWT 토큰을 응답 헤더에 설정
-     */
-    @Override
-    protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authResult) {
-        CustomUser customUser = (CustomUser) authResult.getPrincipal();
-        MemberDto memberDto = customUser.getMemberDto();
+    return authentication;
+  }
 
-        Long id = memberDto.getId();
-        String email = memberDto.getEmail();
-        String roles = memberDto.getRole();
+  /** 인증 성공시 - JWT 토큰 생성 - JWT 토큰을 응답 헤더에 설정 */
+  @Override
+  protected void successfulAuthentication(
+      HttpServletRequest request,
+      HttpServletResponse response,
+      FilterChain chain,
+      Authentication authResult) {
+    CustomUser customUser = (CustomUser) authResult.getPrincipal();
+    MemberDto memberDto = customUser.getMemberDto();
 
-        String jwt = jwtTokenProvider.createToken(id, email, roles);
-        response.addHeader(SecurityConstants.TOKEN_HEADER, SecurityConstants.TOKEN_PREFIX + jwt);
-        response.setStatus(HttpStatus.OK.value());
-    }
+    Long id = memberDto.getId();
+    String email = memberDto.getEmail();
+    String roles = memberDto.getRole();
 
+    String jwt = jwtTokenProvider.createToken(id, email, roles);
+    response.addHeader(SecurityConstants.TOKEN_HEADER, SecurityConstants.TOKEN_PREFIX + jwt);
+    response.setStatus(HttpStatus.OK.value());
+  }
 }
