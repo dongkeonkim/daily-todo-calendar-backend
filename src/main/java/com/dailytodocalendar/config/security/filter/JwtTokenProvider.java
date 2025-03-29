@@ -3,10 +3,12 @@ package com.dailytodocalendar.config.security.filter;
 import com.dailytodocalendar.api.member.dto.MemberDto;
 import com.dailytodocalendar.api.member.repository.MemberRepository;
 import com.dailytodocalendar.common.codes.ErrorCode;
+import com.dailytodocalendar.common.exception.ApplicationException;
 import com.dailytodocalendar.config.security.constants.SecurityConstants;
 import com.dailytodocalendar.config.security.custom.CustomUser;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,21 +28,33 @@ public class JwtTokenProvider {
     private final MemberRepository memberRepository;
 
     @Value("${secret-key}")
-    private String secretKey;
+    private String secretKeyString;
 
-    public String createToken(long uuid, String email, String roles) {
-        String jwt =  Jwts.builder()
-                .signWith(getShaKey(), Jwts.SIG.HS512)
+    private SecretKey secretKey;
+
+    @PostConstruct
+    public void init() {
+        this.secretKey = Keys.hmacShaKeyFor(secretKeyString.getBytes());
+        log.info("JWT Secret Key initialized");
+    }
+
+    public String createToken(long userId, String email, String roles) {
+        Date now = new Date();
+
+        Date validity = new Date(now.getTime() + 1000 * 60 * 60 * 2);
+
+        String jwt = Jwts.builder()
+                .signWith(secretKey, Jwts.SIG.HS512)
                 .header().add("typ", SecurityConstants.TOKEN_TYPE)
                 .and()
-                .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 2))
-                .claim("uid", uuid)
+                .issuedAt(now)
+                .expiration(validity)
+                .claim("uid", userId)
                 .claim("email", email)
                 .claim("role", roles)
                 .compact();
 
-        log.info("jwt : " + jwt);
-
+        log.debug("JWT token created for user: {}", email);
         return jwt;
     }
 
@@ -52,73 +66,68 @@ public class JwtTokenProvider {
 
         try {
             String jwt = authHeader.replace(SecurityConstants.TOKEN_PREFIX, "");
-            Jws<Claims> parsedToken = Jwts.parser()
-                    .verifyWith(getShaKey())
-                    .build()
-                    .parseSignedClaims(jwt);
+            Jws<Claims> parsedToken = parseToken(jwt);
 
-            log.info("parsedToken: " + parsedToken);
-
-            String email = parsedToken.getPayload().get("email").toString();
-            log.info("email: " + email);
+            if (parsedToken == null) {
+                return null;
+            }
 
             Claims claims = parsedToken.getPayload();
-            Object roles = claims.get("role");
-            log.info("roles: " + roles);
+            String email = claims.get("email", String.class);
+
+            if (email == null) {
+                log.warn("Email claim not found in token");
+                return null;
+            }
 
             MemberDto memberDto = memberRepository.findByEmailAndDelYn(email, false)
                     .map(MemberDto::fromEntity)
-                    .orElseThrow(() -> new IllegalArgumentException(ErrorCode.USER_NOT_FOUND.getMessage()));
+                    .orElseThrow(() -> new ApplicationException(ErrorCode.USER_NOT_FOUND));
 
             UserDetails userDetails = new CustomUser(memberDto);
-            return new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+            return new UsernamePasswordAuthenticationToken(
+                    userDetails,
+                    null,
+                    userDetails.getAuthorities()
+            );
 
-        } catch (ExpiredJwtException exception) {
-            log.warn("expired JWT: {} failed: {}" , authHeader, exception.getMessage());
-        } catch (UnsupportedJwtException exception) {
-            log.warn("unsupported JWT: {} failed: {}" , authHeader, exception.getMessage());
-        } catch (MalformedJwtException exception) {
-            log.warn("invalid JWT: {} failed: {}" , authHeader, exception.getMessage());
-        } catch (IllegalArgumentException exception) {
-            log.warn("empty JWT: {} failed: {}" , authHeader, exception.getMessage());
+        } catch (Exception e) {
+            log.warn("Failed to authenticate with token: {}", e.getMessage());
+            return null;
         }
-
-        return null;
     }
 
-    /**
-     * 토큰 유효성 검사
-     */
-    public boolean validateToken(String jwt) {
+    public boolean validateToken(String token) {
         try {
-            Jws<Claims> parsedToken = Jwts.parser()
-                    .verifyWith(getShaKey())
-                    .build()
-                    .parseSignedClaims(jwt);
-
-            Date exp = parsedToken.getPayload().getExpiration();
-            return !exp.before(new Date());
-        } catch (ExpiredJwtException exception) {
-            log.warn("Token Expired");
-            return false;
-        } catch (JwtException exception) {
-            log.warn("Token Tampered");
-            return false;
-        } catch (NullPointerException exception) {
-            log.warn("Token is null");
-            return false;
-        } catch (Exception exception) {
+            Jws<Claims> claims = parseToken(token);
+            return !claims.getPayload().getExpiration().before(new Date());
+        } catch (Exception e) {
+            log.warn("Token validation failed: {}", e.getMessage());
             return false;
         }
-
     }
 
-    private byte[] getSignKey() {
-        return secretKey.getBytes();
+    private Jws<Claims> parseToken(String token) {
+        try {
+            return Jwts.parser()
+                    .verifyWith(secretKey)
+                    .build()
+                    .parseSignedClaims(token);
+        } catch (ExpiredJwtException e) {
+            log.warn("Expired JWT token: {}", e.getMessage());
+            throw e;
+        } catch (UnsupportedJwtException e) {
+            log.warn("Unsupported JWT token: {}", e.getMessage());
+            throw e;
+        } catch (MalformedJwtException e) {
+            log.warn("Invalid JWT token: {}", e.getMessage());
+            throw e;
+        } catch (IllegalArgumentException e) {
+            log.warn("Empty JWT claims string: {}", e.getMessage());
+            throw e;
+        } catch (Exception e) {
+            log.error("JWT parsing error: {}", e.getMessage());
+            throw e;
+        }
     }
-
-    private SecretKey getShaKey() {
-        return Keys.hmacShaKeyFor(getSignKey());
-    }
-
 }

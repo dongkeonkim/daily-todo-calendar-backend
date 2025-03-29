@@ -24,14 +24,32 @@ public class AuthService {
     private final JwtTokenProvider jwtTokenProvider;
     private final PasswordEncoder passwordEncoder;
 
-    public void signUp(SignUpRequest SignUpRequest) {
-        memberRepository.findByEmail(SignUpRequest.getEmail())
-                .ifPresent(m -> { throw new ApplicationException(ErrorCode.USER_ALREADY_EXIST); });
+    /**
+     * 신규 사용자 등록
+     * @param signUpRequest
+     */
+    public void signUp(SignUpRequest signUpRequest) {
+        log.debug("email(sign-up request): {}", signUpRequest.getEmail());
 
-        memberRepository.save(Member.create(
-                SignUpRequest.getEmail(), SignUpRequest.getPassword(), SignUpRequest.getName(),
-                passwordEncoder
-        ));
+        memberRepository.findByEmail(signUpRequest.getEmail())
+                .ifPresent(m -> {
+                    log.warn("Sign-up failed: Email already exists: {}", signUpRequest.getEmail());
+                    throw new ApplicationException(ErrorCode.USER_ALREADY_EXIST);
+                });
+
+        try {
+            Member newMember = Member.create(
+                    signUpRequest.getEmail(),
+                    signUpRequest.getPassword(),
+                    signUpRequest.getName(),
+                    passwordEncoder
+            );
+            memberRepository.save(newMember);
+            log.info("User registered successfully: {}", signUpRequest.getEmail());
+        } catch (Exception e) {
+            log.error("Error during user registration: {}", e.getMessage());
+            throw new ApplicationException(ErrorCode.DATABASE_ERROR);
+        }
     }
 
     @Transactional(readOnly = true)
@@ -39,15 +57,30 @@ public class AuthService {
         String email = loginRequest.getEmail();
         String password = loginRequest.getPassword();
 
+        log.debug("email(login request): {}", email);
+
         Member member = memberRepository.findByEmailAndDelYn(email, false)
-                .orElseThrow(() -> new ApplicationException(ErrorCode.INVALID_LOGIN));
+                .orElseThrow(() -> {
+                    log.warn("Login failed: User not found or deleted: {}", email);
+                    return new ApplicationException(ErrorCode.INVALID_LOGIN);
+                });
 
         if (!passwordEncoder.matches(password, member.getPassword())) {
+            log.warn("Login failed: Invalid password for user: {}", email);
             throw new ApplicationException(ErrorCode.INVALID_LOGIN);
         }
 
-        String token = jwtTokenProvider.createToken(member.getId(), member.getEmail(), member.getRole());
-        return LoginResponse.of(token);
+        try {
+            String token = jwtTokenProvider.createToken(
+                    member.getId(),
+                    member.getEmail(),
+                    member.getRole()
+            );
+            log.info("User logged in successfully: {}", email);
+            return LoginResponse.of(token);
+        } catch (Exception e) {
+            log.error("Error generating token for user {}: {}", email, e.getMessage());
+            throw new ApplicationException(ErrorCode.INVALID_LOGIN);
+        }
     }
-
 }
