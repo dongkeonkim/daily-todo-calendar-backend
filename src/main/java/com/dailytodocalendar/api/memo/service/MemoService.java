@@ -80,7 +80,7 @@ public class MemoService {
                 });
 
         try {
-            if (memoDto.getTodos() != null) {
+            if (memoDto.getTodos() != null && !memoDto.getTodos().isEmpty()) {
                 memoDto.getTodos().forEach(todoDto -> todoDto.setMemberId(memberDto.getId()));
             }
 

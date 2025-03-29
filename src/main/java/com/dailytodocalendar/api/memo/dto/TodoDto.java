@@ -2,6 +2,8 @@ package com.dailytodocalendar.api.memo.dto;
 
 import com.dailytodocalendar.api.memo.entity.Memo;
 import com.dailytodocalendar.api.memo.entity.Todo;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -14,7 +16,11 @@ import java.time.LocalDateTime;
 public class TodoDto {
     private Long id;
     private Long memberId;
+
+    @NotBlank(message = "할 일 내용은 필수 입력 항목입니다.")
+    @Size(max = 500, message = "할 일 내용은 최대 500자까지 입력 가능합니다.")
     private String content;
+
     private boolean completed;
     private Long memoId;
     private LocalDateTime todoRegDate;
@@ -39,7 +45,7 @@ public class TodoDto {
                 .content(content)
                 .completed(completed)
                 .memo(Memo.builder().id(memoId).build())
-                .todoRegDate(todoRegDate)
+                .todoRegDate(todoRegDate != null ? todoRegDate : LocalDateTime.now())
                 .todoUdtDate(LocalDateTime.now())
                 .build();
     }

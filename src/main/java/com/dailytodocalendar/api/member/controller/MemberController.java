@@ -7,6 +7,7 @@ import com.dailytodocalendar.api.member.service.MemberService;
 import com.dailytodocalendar.common.codes.SuccessCode;
 import com.dailytodocalendar.common.response.ResponseDto;
 import com.dailytodocalendar.config.security.custom.CustomUser;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -22,18 +23,23 @@ public class MemberController {
 
     @GetMapping("/info")
     public ResponseDto<MemberDto> userInfo(@AuthenticationPrincipal CustomUser customUser) {
-        return ResponseDto.success(SuccessCode.SUCCESS, memberService.findMember(customUser.getMemberDto())
-        );
+        log.debug("회원 정보 조회 요청 - 이메일: {}", customUser.getUsername());
+        return ResponseDto.success(SuccessCode.SUCCESS, memberService.findMember(customUser.getMemberDto()));
     }
 
     @PutMapping("/update")
-    public ResponseDto<Void> update(@AuthenticationPrincipal CustomUser customUser, @RequestBody MemberUpdateDto memberUpdateDto) {
+    public ResponseDto<Void> update(
+            @AuthenticationPrincipal CustomUser customUser,
+            @Valid @RequestBody MemberUpdateDto memberUpdateDto) {
+
+        log.debug("회원 정보 수정 요청 - 이메일: {}", customUser.getUsername());
         memberService.updateMember(customUser.getMemberDto(), memberUpdateDto);
         return ResponseDto.success(SuccessCode.UPDATED);
     }
 
     @PutMapping("/delete")
-    public ResponseDto<Void> delete(@RequestBody MemberDeleteDto memberDeleteDto) {
+    public ResponseDto<Void> delete(@Valid @RequestBody MemberDeleteDto memberDeleteDto) {
+        log.debug("회원 탈퇴 요청 - 이메일: {}", memberDeleteDto.getEmail());
         memberService.deleteMember(memberDeleteDto);
         return ResponseDto.success(SuccessCode.DELETED);
     }

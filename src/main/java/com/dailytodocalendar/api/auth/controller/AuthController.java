@@ -23,14 +23,15 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/sign-up")
-    public ResponseDto<Void> signUp(@Valid @RequestBody SignUpRequest SignUpRequest) {
-        authService.signUp(SignUpRequest);
+    public ResponseDto<Void> signUp(@Valid @RequestBody SignUpRequest signUpRequest) {
+        log.info("회원가입 요청: {}", signUpRequest);
+        authService.signUp(signUpRequest);
         return ResponseDto.success(SuccessCode.CREATED);
     }
 
     @PostMapping("/login")
     public ResponseDto<LoginResponse> login(@RequestBody LoginRequest loginRequest) {
+        log.info("로그인 요청: {}", loginRequest);
         return ResponseDto.success(SuccessCode.SUCCESS, authService.login(loginRequest));
     }
-
 }
