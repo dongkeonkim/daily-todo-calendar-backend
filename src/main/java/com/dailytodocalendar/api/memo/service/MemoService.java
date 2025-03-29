@@ -30,18 +30,12 @@ public class MemoService {
   }
 
   @Transactional(readOnly = true)
-  @org.springframework.cache.annotation.Cacheable(
-      value = "calendarDataCache",
-      key = "'calendar_' + #memberId + '_' + #year")
   public List<CalendarDto> getTodoCountInCalendar(Integer year, long memberId) {
     log.debug("Fetching calendar todo counts for year: {}, member: {}", year, memberId);
     return memoRepository.getTodoCountInCalendar(year, memberId);
   }
 
   @Transactional(readOnly = true)
-  @org.springframework.cache.annotation.Cacheable(
-      value = "todoYearsCache",
-      key = "'years_' + #memberId")
   public List<String> getTodoCompleteYears(long memberId) {
     log.debug("Fetching todo years for member: {}", memberId);
     List<String> years = memoRepository.getTodoCompleteYears(memberId);
@@ -56,9 +50,6 @@ public class MemoService {
   }
 
   @Transactional
-  @org.springframework.cache.annotation.CacheEvict(
-      value = {"calendarDataCache", "todoYearsCache"},
-      allEntries = true)
   public MemoDto createMemo(MemoDto memoDto, MemberDto memberDto) {
     try {
       memoDto.setMemberId(memberDto.getId());
@@ -76,9 +67,6 @@ public class MemoService {
   }
 
   @Transactional
-  @org.springframework.cache.annotation.CacheEvict(
-      value = {"calendarDataCache", "todoYearsCache"},
-      allEntries = true)
   public MemoDto updateMemo(MemoDto memoDto, MemberDto memberDto) {
     Memo memo =
         memoRepository
@@ -109,9 +97,6 @@ public class MemoService {
   }
 
   @Transactional
-  @org.springframework.cache.annotation.CacheEvict(
-      value = {"calendarDataCache", "todoYearsCache"},
-      allEntries = true)
   public void deleteMemo(Long id, MemberDto memberDto) {
     Memo memo =
         memoRepository
