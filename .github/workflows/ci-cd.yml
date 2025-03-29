@@ -9,9 +9,9 @@ on:
 
 env:
   PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
-  SERVICE_NAME: dailytodocalendar-backend
+  SERVICE_NAME: dailytodocalendar
   REGION: us-central1
-  DOCKER_IMAGE_NAME: gcr.io/${{ secrets.GCP_PROJECT_ID }}/dailytodocalendar-backend
+  DOCKER_IMAGE_NAME: gcr.io/${{ secrets.GCP_PROJECT_ID }}/dailytodocalendar
 
 jobs:
   build-and-test:
