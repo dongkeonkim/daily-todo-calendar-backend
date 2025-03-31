@@ -1,119 +1,145 @@
 plugins {
-	id 'java'
-	id 'org.springframework.boot' version '3.2.5'
-	id 'io.spring.dependency-management' version '1.1.4'
-	id 'com.diffplug.spotless' version '6.25.0'
-	id 'jacoco'
+    id 'java'
+    id 'org.springframework.boot' version '3.2.5'
+    id 'io.spring.dependency-management' version '1.1.4'
+    id 'com.diffplug.spotless' version '6.25.0'
+    id 'jacoco'
 }
 
 group = 'com.dailytodocalendar'
 version = '0.0.1-SNAPSHOT'
 
 java {
-	sourceCompatibility = '17'
+    sourceCompatibility = '17'
 }
 
 configurations {
-	compileOnly {
-		extendsFrom annotationProcessor
-	}
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
 }
 
 repositories {
-	mavenCentral()
+    mavenCentral()
 }
 
 ext {
-	queryDslVersion = '5.0.0'
-	jwtVersion = '0.12.3'
-	springDocVersion = '2.3.0'
+    queryDslVersion = '5.0.0'
+    jwtVersion = '0.12.3'
+    springDocVersion = '2.3.0'
 }
 
 dependencies {
-	// Spring Boot
-	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-	implementation 'org.springframework.boot:spring-boot-starter-security'
-	implementation 'org.springframework.boot:spring-boot-starter-web'
-	implementation 'org.springframework.boot:spring-boot-starter-validation'
-	implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    // Spring Boot
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
 
-	// API Documentation
-	implementation "org.springdoc:springdoc-openapi-starter-webmvc-ui:${springDocVersion}"
+    // API Documentation
+    implementation "org.springdoc:springdoc-openapi-starter-webmvc-ui:${springDocVersion}"
 
-	// QueryDSL
-	implementation "com.querydsl:querydsl-jpa:${queryDslVersion}:jakarta"
-	annotationProcessor "com.querydsl:querydsl-apt:${queryDslVersion}:jakarta"
-	annotationProcessor "jakarta.annotation:jakarta.annotation-api"
-	annotationProcessor "jakarta.persistence:jakarta.persistence-api"
+    // QueryDSL
+    implementation "com.querydsl:querydsl-jpa:${queryDslVersion}:jakarta"
+    annotationProcessor "com.querydsl:querydsl-apt:${queryDslVersion}:jakarta"
+    annotationProcessor "jakarta.annotation:jakarta.annotation-api"
+    annotationProcessor "jakarta.persistence:jakarta.persistence-api"
 
-	// JWT
-	implementation "io.jsonwebtoken:jjwt-api:${jwtVersion}"
-	implementation "io.jsonwebtoken:jjwt-impl:${jwtVersion}"
-	implementation "io.jsonwebtoken:jjwt-jackson:${jwtVersion}"
+    // JWT
+    implementation "io.jsonwebtoken:jjwt-api:${jwtVersion}"
+    implementation "io.jsonwebtoken:jjwt-impl:${jwtVersion}"
+    implementation "io.jsonwebtoken:jjwt-jackson:${jwtVersion}"
 
-	// Database
-	implementation 'org.postgresql:postgresql:42.6.0'
-	implementation 'com.google.cloud.sql:postgres-socket-factory:1.14.1'
+    // Database
+    implementation 'org.postgresql:postgresql:42.6.0'
+    implementation 'com.google.cloud.sql:postgres-socket-factory:1.14.1'
 
-	implementation 'com.github.vladimir-bukhtoyarov:bucket4j-core:7.6.0'
+    implementation 'com.github.vladimir-bukhtoyarov:bucket4j-core:7.6.0'
 
-	compileOnly 'org.projectlombok:lombok'
-	developmentOnly 'org.springframework.boot:spring-boot-devtools'
-	annotationProcessor 'org.projectlombok:lombok'
+    compileOnly 'org.projectlombok:lombok'
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'
+    annotationProcessor 'org.projectlombok:lombok'
 
-	implementation 'io.micrometer:micrometer-registry-prometheus'
+    implementation 'io.micrometer:micrometer-registry-prometheus'
 
-	// Test
-	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-	testImplementation 'org.springframework.security:spring-security-test'
-	testImplementation 'org.junit.jupiter:junit-jupiter:5.10.0'
-	testImplementation 'org.mockito:mockito-core:5.8.0'
-	testImplementation 'org.mockito:mockito-junit-jupiter:5.8.0'
-	testImplementation 'com.h2database:h2:2.2.224'
+    // Test
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.security:spring-security-test'
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.0'
+    testImplementation 'org.mockito:mockito-core:5.8.0'
+    testImplementation 'org.mockito:mockito-junit-jupiter:5.8.0'
+    testImplementation 'com.h2database:h2:2.2.224'
 }
 
 // QueryDSL
 def querydslDir = layout.buildDirectory.dir("generated/querydsl").get().asFile
 
 sourceSets {
-	main.java.srcDirs += [ querydslDir ]
+    main.java.srcDirs += [querydslDir]
 }
 
 tasks.withType(JavaCompile).configureEach {
-	options.generatedSourceOutputDirectory.set(file(querydslDir))
+    options.generatedSourceOutputDirectory.set(file(querydslDir))
 }
 
 spotless {
-	java {
-		googleJavaFormat()
-		removeUnusedImports()
-		trimTrailingWhitespace()
-		endWithNewline()
+    java {
+        googleJavaFormat()
+        removeUnusedImports()
+        trimTrailingWhitespace()
+        endWithNewline()
 
-		// 자동 생성된 코드는 스타일 검사에서 제외
-		targetExclude "build/generated/**", "**/generated/**", "**/generated-sources/**"
+        // 자동 생성된 코드는 스타일 검사에서 제외
+        targetExclude "build/generated/**", "**/generated/**", "**/generated-sources/**"
 
-		// QueryDSL 관련 파일만 명시적으로 제외
-		targetExclude "**/Q*.java"
-	}
+        // QueryDSL 관련 파일만 명시적으로 제외
+        targetExclude "**/Q*.java"
+    }
 }
 
 jacoco {
-	toolVersion = "0.8.10"
+    toolVersion = "0.8.10"
 }
 
 jacocoTestReport {
-	reports {
-		xml.required = true
-		html.required = true
-	}
+    reports {
+        xml.required = true
+        html.required = true
+    }
+}
+
+tasks.register('installGitHooks') {
+    doLast {
+        def hooksDir = new File("${rootProject.rootDir}/.git-hooks")
+        hooksDir.mkdirs()
+
+        def preCommitFile = new File(hooksDir, "pre-commit")
+        preCommitFile.text = """#!/bin/sh
+echo "Running spotlessApply before commit..."
+./gradlew spotlessApply
+git add .
+if [ \$? -ne 0 ]; then
+  echo "spotlessApply failed, commit aborted!"
+  exit 1
+fi
+"""
+
+        preCommitFile.setExecutable(true)
+
+        exec {
+            commandLine 'git', 'config', 'core.hooksPath', '.git-hooks'
+        }
+
+        println "Git hooks installed successfully!"
+    }
 }
 
 tasks.test {
-	useJUnitPlatform()
-	finalizedBy(jacocoTestReport)
+    useJUnitPlatform()
+    finalizedBy(jacocoTestReport)
 }
 
 clean.doLast {
-	file(querydslDir).deleteDir()
+    file(querydslDir).deleteDir()
 }
