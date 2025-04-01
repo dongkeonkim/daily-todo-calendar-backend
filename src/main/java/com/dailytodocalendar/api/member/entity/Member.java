@@ -21,6 +21,8 @@ public class Member {
   @Column(unique = true)
   private String email;
 
+  private Long kakaoId;
+
   private String password;
 
   private String name;
@@ -44,6 +46,10 @@ public class Member {
   public void changeDelYn(Boolean delYn) {
     this.delYn = delYn;
     this.udtDate = LocalDateTime.now();
+  }
+
+  public void setKakaoId(Long kakaoId) {
+    this.kakaoId = kakaoId;
   }
 
   public static Member create(

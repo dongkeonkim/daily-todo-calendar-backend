@@ -47,6 +47,12 @@ jwt:
   expiration: 7200000  # 2시간
   refresh-expiration: 604800000  # 7일
 
+oauth2:
+  kakao:
+    client-id: ${sm://kakao-client-id}
+    client-secret: ${sm://kakao-client-secret}
+    redirect-uri: ${sm://kakao-redirect-uri:http://localhost:3000/auth/kakao/callback}
+
 ---
 spring:
   config:
