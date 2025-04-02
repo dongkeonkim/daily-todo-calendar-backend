@@ -165,6 +165,6 @@ secret-key: ${JWT_SECRET_KEY}
 
 oauth2:
   kakao:
-    client-id: ${sm://KAKAO_CLIENT_ID}
-    client-secret: ${sm://KAKAO_CLIENT_SECRET}
-    redirect-uri: ${sm://KAKAO_REDIRECT_URI}
+    client-id: ${sm://projects/loyal-curve-454512-u7/secrets/KAKAO_CLIENT_ID/versions/latest}
+    client-secret: ${sm://projects/loyal-curve-454512-u7/secrets/KAKAO_CLIENT_SECRET/versions/latest}
+    redirect-uri: ${sm://projects/loyal-curve-454512-u7/secrets/KAKAO_REDIRECT_URI/versions/latest}
