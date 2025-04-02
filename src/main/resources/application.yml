@@ -52,6 +52,12 @@ jwt:
   expiration: 7200000  # 2시간
   refresh-expiration: 604800000  # 7일
 
+oauth2:
+  kakao:
+    client-id: ${KAKAO_CLIENT_ID}
+    client-secret: ${KAKAO_CLIENT_SECRET}
+    redirect-uri: ${KAKAO_REDIRECT_URI:http://localhost:3000/auth/kakao/callback}
+
 ---
 spring:
   config:
@@ -93,17 +99,15 @@ server:
 
 secret-key: ${JWT_SECRET_KEY:a8c06ffd71cb6fdfa7929ee25247922e1b642a1c104d16944596613e96ae553c}
 
-oauth2:
-  kakao:
-    client-id: ${KAKAO_CLIENT_ID}
-    client-secret: ${KAKAO_CLIENT_SECRET}
-    redirect-uri: ${KAKAO_REDIRECT_URI:http://localhost:3000/auth/kakao/callback}
-
 ---
 spring:
   config:
     activate:
       on-profile: prod
+    import:
+      - "sm://KAKAO_CLIENT_ID"
+      - "sm://KAKAO_CLIENT_SECRET"
+      - "sm://KAKAO_REDIRECT_URI"
   datasource:
     url: ${SPRING_DATASOURCE_URL}
     username: ${SPRING_DATASOURCE_USERNAME}
@@ -163,8 +167,3 @@ logging:
 
 secret-key: ${JWT_SECRET_KEY}
 
-oauth2:
-  kakao:
-    client-id: ${sm://projects/loyal-curve-454512-u7/secrets/KAKAO_CLIENT_ID/versions/latest}
-    client-secret: ${sm://projects/loyal-curve-454512-u7/secrets/KAKAO_CLIENT_SECRET/versions/latest}
-    redirect-uri: ${sm://projects/loyal-curve-454512-u7/secrets/KAKAO_REDIRECT_URI/versions/latest}
