@@ -13,6 +13,11 @@ spring:
       name: actuator
       password: ${ACTUATOR_PASSWORD:actuator123}
       roles: ACTUATOR_ADMIN
+  cloud:
+    gcp:
+      secretmanager:
+        enabled: true
+        project-id: loyal-curve-454512-u7
 
 management:
   endpoints:
@@ -46,12 +51,6 @@ springdoc:
 jwt:
   expiration: 7200000  # 2시간
   refresh-expiration: 604800000  # 7일
-
-oauth2:
-  kakao:
-    client-id: ${sm://kakao-client-id}
-    client-secret: ${sm://kakao-client-secret}
-    redirect-uri: ${sm://kakao-redirect-uri:http://localhost:3000/auth/kakao/callback}
 
 ---
 spring:
@@ -93,6 +92,12 @@ server:
     include-stacktrace: never
 
 secret-key: ${JWT_SECRET_KEY:a8c06ffd71cb6fdfa7929ee25247922e1b642a1c104d16944596613e96ae553c}
+
+oauth2:
+  kakao:
+    client-id: ${KAKAO_CLIENT_ID}
+    client-secret: ${KAKAO_CLIENT_SECRET}
+    redirect-uri: ${KAKAO_REDIRECT_URI:http://localhost:3000/auth/kakao/callback}
 
 ---
 spring:
@@ -157,3 +162,9 @@ logging:
       max-history: 7
 
 secret-key: ${JWT_SECRET_KEY}
+
+oauth2:
+  kakao:
+    client-id: ${sm://kakao-client-id}
+    client-secret: ${sm://kakao-client-secret}
+    redirect-uri: ${sm://kakao-redirect-uri}

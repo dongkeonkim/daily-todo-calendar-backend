@@ -55,6 +55,8 @@ dependencies {
     implementation 'org.postgresql:postgresql:42.6.0'
     implementation 'com.google.cloud.sql:postgres-socket-factory:1.14.1'
 
+    implementation 'com.google.cloud:google-cloud-secretmanager:2.32.0'
+
     implementation 'com.github.vladimir-bukhtoyarov:bucket4j-core:7.6.0'
 
     compileOnly 'org.projectlombok:lombok'

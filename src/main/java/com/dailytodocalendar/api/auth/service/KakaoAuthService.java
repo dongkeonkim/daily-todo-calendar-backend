@@ -6,12 +6,12 @@ import com.dailytodocalendar.api.member.entity.Member;
 import com.dailytodocalendar.api.member.repository.MemberRepository;
 import com.dailytodocalendar.common.codes.ErrorCode;
 import com.dailytodocalendar.common.exception.ApplicationException;
+import com.dailytodocalendar.config.properties.KakaoProperties;
 import com.dailytodocalendar.config.security.filter.JwtTokenProvider;
 import java.util.Map;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -29,15 +29,7 @@ public class KakaoAuthService {
   private final MemberRepository memberRepository;
   private final JwtTokenProvider jwtTokenProvider;
   private final PasswordEncoder passwordEncoder;
-
-  @Value("${oauth2.kakao.client-id}")
-  private String clientId;
-
-  @Value("${oauth2.kakao.redirect-uri}")
-  private String redirectUri;
-
-  @Value("${oauth2.kakao.client-secret}")
-  private String clientSecret;
+  private final KakaoProperties kakaoProperties;
 
   public LoginResponse processKakaoLogin(String code) {
     try {
@@ -72,10 +64,10 @@ public class KakaoAuthService {
 
       MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
       params.add("grant_type", "authorization_code");
-      params.add("client_id", clientId);
-      params.add("redirect_uri", redirectUri);
+      params.add("client_id", kakaoProperties.getClientId());
+      params.add("redirect_uri", kakaoProperties.getRedirectUri());
       params.add("code", code);
-      params.add("client_secret", clientSecret);
+      params.add("client_secret", kakaoProperties.getClientSecret());
 
       HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(params, headers);
 
