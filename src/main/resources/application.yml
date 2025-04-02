@@ -13,11 +13,6 @@ spring:
       name: actuator
       password: ${ACTUATOR_PASSWORD:actuator123}
       roles: ACTUATOR_ADMIN
-  cloud:
-    gcp:
-      secretmanager:
-        enabled: true
-        project-id: loyal-curve-454512-u7
 
 management:
   endpoints:
@@ -104,10 +99,6 @@ spring:
   config:
     activate:
       on-profile: prod
-    import:
-      - "sm://KAKAO_CLIENT_ID"
-      - "sm://KAKAO_CLIENT_SECRET"
-      - "sm://KAKAO_REDIRECT_URI"
   datasource:
     url: ${SPRING_DATASOURCE_URL}
     username: ${SPRING_DATASOURCE_USERNAME}
@@ -166,4 +157,3 @@ logging:
       max-history: 7
 
 secret-key: ${JWT_SECRET_KEY}
-

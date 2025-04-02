@@ -113,6 +113,9 @@ jobs:
           secrets: |
             JWT_SECRET_KEY=JWT_SECRET_KEY:latest
             SPRING_DATASOURCE_URL=SPRING_DATASOURCE_URL:latest
+            KAKAO_CLIENT_ID=KAKAO_CLIENT_ID:latest
+            KAKAO_CLIENT_SECRET=KAKAO_CLIENT_SECRET:latest
+            KAKAO_REDIRECT_URI=KAKAO_REDIRECT_URI:latest
           flags: |
             --service-account=cloud-sql-proxy@loyal-curve-454512-u7.iam.gserviceaccount.com
             --add-cloudsql-instances=fresh-forest-454510-i9:us-central1:myapp-prod-postgresql
