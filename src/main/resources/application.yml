@@ -165,6 +165,6 @@ secret-key: ${JWT_SECRET_KEY}
 
 oauth2:
   kakao:
-    client-id: ${sm://kakao-client-id}
-    client-secret: ${sm://kakao-client-secret}
-    redirect-uri: ${sm://kakao-redirect-uri}
+    client-id: ${sm://KAKAO_CLIENT_ID}
+    client-secret: ${sm://KAKAO_CLIENT_SECRET}
+    redirect-uri: ${sm://KAKAO_REDIRECT_URI}
