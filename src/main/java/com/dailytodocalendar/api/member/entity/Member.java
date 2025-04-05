@@ -1,7 +1,6 @@
 package com.dailytodocalendar.api.member.entity;
 
 import com.dailytodocalendar.api.member.dto.MemberUpdateDto;
-import com.querydsl.core.util.StringUtils;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import lombok.AccessLevel;
@@ -18,7 +17,6 @@ public class Member {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @Column(unique = true)
   private String email;
 
   private Long kakaoId;
@@ -37,9 +35,12 @@ public class Member {
 
   public void updateMember(MemberUpdateDto memberUpdateDto, PasswordEncoder passwordEncoder) {
     this.name = memberUpdateDto.getName();
-    if (!StringUtils.isNullOrEmpty(memberUpdateDto.getNewPassword())) {
+
+    // 새 비밀번호가 제공된 경우에만 비밀번호 업데이트
+    if (memberUpdateDto.getNewPassword() != null && !memberUpdateDto.getNewPassword().isEmpty()) {
       this.password = passwordEncoder.encode(memberUpdateDto.getNewPassword());
     }
+
     this.udtDate = LocalDateTime.now();
   }
 

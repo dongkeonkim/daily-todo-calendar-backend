@@ -37,19 +37,26 @@ public class MemberService {
             .findByEmailAndDelYn(mDto.getEmail(), false)
             .orElseThrow(() -> new ApplicationException(ErrorCode.USER_NOT_FOUND));
 
-    if (!passwordEncoder.matches(memberUpdateDto.getPassword(), member.getPassword())) {
-      throw new ApplicationException(ErrorCode.INVALID_PASSWORD);
+    // 카카오 사용자(kakaoId가 있는 경우)는 비밀번호 검증을 건너뜀
+    if (member.getKakaoId() == null) {
+      if (!passwordEncoder.matches(memberUpdateDto.getPassword(), member.getPassword())) {
+        throw new ApplicationException(ErrorCode.INVALID_PASSWORD);
+      }
     }
 
     member.updateMember(memberUpdateDto, passwordEncoder);
   }
 
-  @Transactional
   public void deleteMember(MemberDeleteDto memberDeleteDto) {
     Member member =
         memberRepository
             .findByEmailAndDelYn(memberDeleteDto.getEmail(), false)
             .orElseThrow(() -> new ApplicationException(ErrorCode.USER_NOT_FOUND));
+
+    // 소셜 로그인 회원(카카오 ID가 있는 경우)은 소셜 탈퇴 API를 통해서만 탈퇴 가능
+    if (member.getKakaoId() != null) {
+      throw new ApplicationException(ErrorCode.INVALID_REQUEST);
+    }
 
     if (!passwordEncoder.matches(memberDeleteDto.getPassword(), member.getPassword())) {
       throw new ApplicationException(ErrorCode.INVALID_PASSWORD);

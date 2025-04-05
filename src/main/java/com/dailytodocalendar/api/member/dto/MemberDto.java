@@ -13,6 +13,7 @@ public class MemberDto {
 
   private Long id;
   private String email;
+  private Long kakaoId;
   @JsonIgnore private String password;
   private String name;
   private String role;
@@ -23,6 +24,7 @@ public class MemberDto {
   public static MemberDto of(
       Long id,
       String email,
+      Long kakaoId,
       String password,
       String name,
       String role,
@@ -32,6 +34,7 @@ public class MemberDto {
     MemberDto memberDto = new MemberDto();
     memberDto.id = id;
     memberDto.email = email;
+    memberDto.kakaoId = kakaoId;
     memberDto.password = password;
     memberDto.name = name;
     memberDto.role = role;
@@ -45,6 +48,7 @@ public class MemberDto {
     return of(
         member.getId(),
         member.getEmail(),
+        member.getKakaoId(),
         member.getPassword(),
         member.getName(),
         member.getRole(),
@@ -61,6 +65,8 @@ public class MemberDto {
         + ", email='"
         + email
         + '\''
+        + ", kakaoId="
+        + kakaoId
         + ", name='"
         + name
         + '\''

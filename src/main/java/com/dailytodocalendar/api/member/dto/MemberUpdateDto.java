@@ -14,7 +14,6 @@ public class MemberUpdateDto {
   @Size(min = 2, max = 20, message = "이름은 2자 이상 20자 이하로 입력해주세요.")
   private String name;
 
-  @NotBlank(message = "현재 비밀번호는 필수 항목입니다.")
   private String password;
 
   @Size(min = 8, max = 20, message = "비밀번호는 8자 이상 20자 이하여야 합니다.")

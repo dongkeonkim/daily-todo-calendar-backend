@@ -33,7 +33,7 @@ public class AuthService {
     log.debug("email(sign-up request): {}", signUpRequest.getEmail());
 
     memberRepository
-        .findByEmail(signUpRequest.getEmail())
+        .findByEmailAndDelYn(signUpRequest.getEmail(), false)
         .ifPresent(
             m -> {
               log.warn("Sign-up failed: Email already exists: {}", signUpRequest.getEmail());

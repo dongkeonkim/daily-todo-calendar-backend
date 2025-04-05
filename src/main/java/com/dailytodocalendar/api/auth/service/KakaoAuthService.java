@@ -125,4 +125,62 @@ public class KakaoAuthService {
               return memberRepository.save(newMember);
             });
   }
+
+  /**
+   * 카카오 계정 연결 해제 및 회원 탈퇴 처리
+   *
+   * @param memberId 탈퇴할 회원 ID
+   */
+  @Transactional
+  public void unlinkKakaoAccount(Long memberId) {
+    try {
+      // 1. 회원 정보 조회
+      Member member =
+          memberRepository
+              .findById(memberId)
+              .orElseThrow(() -> new ApplicationException(ErrorCode.USER_NOT_FOUND));
+
+      // 2. 카카오 ID가 있는 경우에만 연결 해제 진행
+      if (member.getKakaoId() != null) {
+        // 3. 카카오 연결 해제 API 호출
+        unlinkFromKakao(member.getKakaoId());
+      }
+
+      // 4. 회원 정보 삭제 처리 (soft delete)
+      member.changeDelYn(true);
+      memberRepository.save(member);
+
+      log.info("Successfully unlinked and deleted Kakao user: {}", member.getEmail());
+    } catch (Exception e) {
+      log.error("Failed to unlink Kakao account: {}", e.getMessage(), e);
+      throw new ApplicationException(ErrorCode.SERVER_ERROR);
+    }
+  }
+
+  /**
+   * 카카오 연결 해제 API 호출
+   *
+   * @param kakaoId 연결 해제할 카카오 ID
+   */
+  private void unlinkFromKakao(Long kakaoId) {
+    try {
+      RestTemplate restTemplate = new RestTemplate();
+
+      HttpHeaders headers = new HttpHeaders();
+      headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+      headers.set("Authorization", "KakaoAK " + kakaoProperties.getAdminKey());
+
+      MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+      params.add("target_id_type", "user_id");
+      params.add("target_id", kakaoId.toString());
+
+      HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(params, headers);
+
+      restTemplate.postForEntity("https://kapi.kakao.com/v1/user/unlink", request, Map.class);
+
+      log.info("Successfully unlinked Kakao ID: {}", kakaoId);
+    } catch (Exception e) {
+      log.error("Error unlinking from Kakao: {}", e.getMessage(), e);
+    }
+  }
 }
