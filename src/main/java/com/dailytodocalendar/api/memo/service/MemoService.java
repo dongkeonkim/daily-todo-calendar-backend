@@ -24,15 +24,22 @@ public class MemoService {
   private final MemoRepository memoRepository;
 
   @Transactional(readOnly = true)
-  public List<MemoDto> selectMemoAll(Integer year, LocalDate date, MemberDto memberDto) {
-    log.debug("Fetching memos for member: {}, year: {}, date: {}", memberDto.getId(), year, date);
-    return memoRepository.findAllByMemberIdAndDate(memberDto.getId(), year, date);
+  public List<MemoDto> selectMemoAll(
+      Integer year, Integer month, LocalDate date, MemberDto memberDto) {
+    log.debug(
+        "Fetching memos for member: {}, year: {}, month: {}, date: {}",
+        memberDto.getId(),
+        year,
+        month,
+        date);
+    return memoRepository.findAllByMemberIdAndDate(memberDto.getId(), year, month, date);
   }
 
   @Transactional(readOnly = true)
-  public List<CalendarDto> getTodoCountInCalendar(Integer year, long memberId) {
-    log.debug("Fetching calendar todo counts for year: {}, member: {}", year, memberId);
-    return memoRepository.getTodoCountInCalendar(year, memberId);
+  public List<CalendarDto> getTodoCountInCalendar(Integer year, Integer month, long memberId) {
+    log.debug(
+        "Fetching calendar todo counts for year: {}, month: {}, member: {}", year, month, memberId);
+    return memoRepository.getTodoCountInCalendar(year, month, memberId);
   }
 
   @Transactional(readOnly = true)
@@ -45,6 +52,7 @@ public class MemoService {
       years.add(currentYear);
     }
 
+    // "전체" 옵션을 추가
     years.add("전체");
     return years;
   }

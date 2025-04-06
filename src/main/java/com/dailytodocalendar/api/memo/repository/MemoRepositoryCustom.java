@@ -9,7 +9,10 @@ import org.springframework.data.repository.query.Param;
 public interface MemoRepositoryCustom {
 
   List<MemoDto> findAllByMemberIdAndDate(
-      @Param("memberId") Long memberId, @Param("year") Integer year, @Param("date") LocalDate date);
+      @Param("memberId") Long memberId,
+      @Param("year") Integer year,
+      @Param("month") Integer month,
+      @Param("date") LocalDate date);
 
-  List<CalendarDto> getTodoCountInCalendar(Integer year, long memberId);
+  List<CalendarDto> getTodoCountInCalendar(Integer year, Integer month, long memberId);
 }
