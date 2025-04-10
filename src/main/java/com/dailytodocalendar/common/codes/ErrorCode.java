@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 
+/** 애플리케이션 에러 코드 정의 */
 @Getter
 @RequiredArgsConstructor
 public enum ErrorCode {
@@ -11,6 +12,7 @@ public enum ErrorCode {
   INVALID_LOGIN(HttpStatus.UNAUTHORIZED, "아이디와 비밀번호가 올바르지 않습니다."),
   INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "토큰이 유효하지 않습니다."),
   TOKEN_EXPIRED(HttpStatus.UNAUTHORIZED, "토큰이 만료되었습니다."),
+  UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "인증이 필요합니다."),
   ACCESS_DENIED(HttpStatus.FORBIDDEN, "접근 권한이 없습니다."),
   INVALID_PASSWORD(HttpStatus.FORBIDDEN, "비밀번호가 유효하지 않습니다."),
 
@@ -29,6 +31,10 @@ public enum ErrorCode {
   INVALID_REQUEST(HttpStatus.BAD_REQUEST, "잘못된 요청입니다."),
   MISSING_REQUIRED_FIELD(HttpStatus.BAD_REQUEST, "필수 입력 항목이 누락되었습니다."),
   PASSWORD_POLICY_VIOLATION(HttpStatus.BAD_REQUEST, "비밀번호는 최소 8자 이상이며, 문자와 숫자를 포함해야 합니다."),
+
+  // 요청 제한
+  TOO_MANY_REQUESTS(HttpStatus.TOO_MANY_REQUESTS, "요청이 너무 많습니다. 잠시 후 다시 시도해주세요."),
+  CONCURRENT_OPERATION_LIMIT(HttpStatus.TOO_MANY_REQUESTS, "동시 작업 제한에 도달했습니다. 잠시 후 다시 시도해주세요."),
 
   // 에러
   DATABASE_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "데이터베이스 오류가 발생했습니다."),
